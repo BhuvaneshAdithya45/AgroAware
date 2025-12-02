@@ -1,11 +1,21 @@
+// client/src/pages/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../lib/api";
 import Navbar from "../components/Navbar";
+import { useTranslation } from "../i18n";
 
 export default function Signup() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ name:"", email:"", password:"", language: "en" });
+  const { t, lang } = useTranslation();
+
+  // default language uses current app language
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    language: lang || "en",
+  });
   const [msg, setMsg] = useState("");
 
   const submit = async (e) => {
@@ -13,11 +23,17 @@ export default function Signup() {
     setMsg("");
     try {
       await API.post("/api/auth/register", form);
-      setMsg("Account created. Please login.");
-      setTimeout(()=> nav("/login"), 900);
-    } catch {
-      setMsg("Signup failed. Email may already exist.");
+      setMsg(t("account_created", "Account created. Please login."));
+      setTimeout(() => nav("/login"), 900);
+    } catch (err) {
+      console.warn("Signup error:", err);
+      setMsg(t("signup_failed", "Signup failed. Email may already exist."));
     }
+  };
+
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((s) => ({ ...s, [name]: value }));
   };
 
   return (
@@ -25,19 +41,54 @@ export default function Signup() {
       <Navbar />
       <div className="mx-auto max-w-md p-6">
         <div className="card space-y-3">
-          <h1 className="text-center text-2xl font-bold text-green-700">Create Account</h1>
+          <h1 className="text-center text-2xl font-bold text-green-700">
+            {t("create_account", "Create Account")}
+          </h1>
+
           <form className="space-y-3" onSubmit={submit}>
-            <input className="input" placeholder="Full Name" onChange={(e)=>setForm({...form, name:e.target.value})}/>
-            <input className="input" placeholder="Email" onChange={(e)=>setForm({...form, email:e.target.value})}/>
-            <input className="input" type="password" placeholder="Password" onChange={(e)=>setForm({...form, password:e.target.value})}/>
-            <select className="input" value={form.language} onChange={(e)=>setForm({...form, language:e.target.value})}>
-              <option value="en">English</option>
-              <option value="kn">Kannada</option>
-              <option value="hi">Hindi</option>
-              <option value="te">Telugu</option>
+            <input
+              name="name"
+              className="input"
+              placeholder={t("placeholder_full_name", "Full Name")}
+              value={form.name}
+              onChange={onChange}
+              required
+            />
+
+            <input
+              name="email"
+              className="input"
+              placeholder={t("email", "Email")}
+              value={form.email}
+              onChange={onChange}
+              required
+            />
+
+            <input
+              name="password"
+              type="password"
+              className="input"
+              placeholder={t("password", "Password")}
+              value={form.password}
+              onChange={onChange}
+              required
+            />
+
+            <select
+              name="language"
+              className="input"
+              value={form.language}
+              onChange={onChange}
+            >
+              <option value="en">{t("lang_en", "English")}</option>
+              <option value="kn">{t("lang_kn", "Kannada")}</option>
+              <option value="hi">{t("lang_hi", "Hindi")}</option>
+              <option value="te">{t("lang_te", "Telugu")}</option>
             </select>
-            <button className="btn w-full">Sign up</button>
+
+            <button className="btn w-full">{t("signup", "Sign up")}</button>
           </form>
+
           {msg && <p className="text-center text-sm text-green-700">{msg}</p>}
         </div>
       </div>

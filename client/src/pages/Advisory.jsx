@@ -8,6 +8,7 @@ import { monthToSeason } from "../lib/season"; // ✅ Season helper
 
 // use the structured API actions
 import { getCropRecommendation, getSeasonalCrops, getSeasonalList } from "../lib/api.actions";
+import { useTranslation } from "../i18n";
 
 /* =========================
    CONFIG
@@ -32,6 +33,8 @@ const KA_DISTRICTS = [
    COMPONENT
 ========================= */
 export default function Advisory(){
+  const { t } = useTranslation();
+
   // Mode: "expert" or "beginner"
   const [mode, setMode] = useState("expert");
 
@@ -72,9 +75,9 @@ export default function Advisory(){
 
   const modeTitle = useMemo(() =>
     mode === "expert"
-      ? "Soil & Weather Inputs (Expert)"
-      : "District & Season (Beginner — No Soil Test)"
-  , [mode]);
+      ? t("mode_expert", "Soil & Weather Inputs (Expert)")
+      : t("mode_beginner", "District & Season (Beginner — No Soil Test)")
+  , [mode, t]);
 
   /* ---------- Load seasonal metadata on mount ---------- */
   useEffect(() => {
@@ -139,9 +142,9 @@ export default function Advisory(){
     const e = {};
     for (const f of FIELDS) {
       const v = form[f.key];
-      if (v === "") e[f.key] = "Required";
-      else if (isNaN(Number(v))) e[f.key] = "Must be a number";
-      else if (f.key === "ph" && (Number(v) < 3 || Number(v) > 10)) e[f.key] = "pH should be 3–10";
+      if (v === "") e[f.key] = t("required", "Required");
+      else if (isNaN(Number(v))) e[f.key] = t("must_be_number", "Must be a number");
+      else if (f.key === "ph" && (Number(v) < 3 || Number(v) > 10)) e[f.key] = t("ph_range", "pH should be 3–10");
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -178,7 +181,7 @@ export default function Advisory(){
 
       window.__agro_result = data;
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Something went wrong";
+      const msg = err?.response?.data?.error || err.message || t("something_wrong", "Something went wrong");
       setResult({ error: msg });
     } finally {
       setLoading(false);
@@ -204,8 +207,8 @@ export default function Advisory(){
   };
 
   const validateBeginner = () => {
-    if (!beginnerForm.district) return "Please select a district";
-    if (!beginnerForm.season)   return "Please select a season";
+    if (!beginnerForm.district) return t("select_district", "Please select a district");
+    if (!beginnerForm.season)   return t("select_season", "Please select a season");
     return "";
   };
 
@@ -238,7 +241,7 @@ export default function Advisory(){
         return updated;
       });
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Something went wrong";
+      const msg = err?.response?.data?.error || err.message || t("something_wrong", "Something went wrong");
       setResult({ error: msg });
     } finally {
       setLoading(false);
@@ -266,7 +269,7 @@ export default function Advisory(){
       setLoading(true);
 
       if (!("geolocation" in navigator)) {
-        setResult({ error: "Geolocation not supported in this browser." });
+        setResult({ error: t("geolocation_not_supported", "Geolocation not supported in this browser.") });
         setLoading(false);
         return;
       }
@@ -317,18 +320,18 @@ export default function Advisory(){
             season: detectedSeason,
           }));
 
-          setResult({ note: `Auto-filled using live weather at your location (${district || "your area"})` });
+          setResult({ note: t("auto_filled_using_location", "Auto-filled using live weather at your location") + ` (${district || t("your_area", "your area")})` });
           setLoading(false);
         },
         (err) => {
-          setResult({ error: "Unable to get location permission. Please allow location access." });
+          setResult({ error: t("location_permission", "Unable to get location permission. Please allow location access.") });
           setLoading(false);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     } catch (err) {
       console.warn("Autofill failed:", err);
-      setResult({ error: "Weather/GPS autofill failed. Try again." });
+      setResult({ error: t("autofill_failed", "Weather/GPS autofill failed. Try again.") });
       setLoading(false);
     }
   };
@@ -342,10 +345,10 @@ export default function Advisory(){
         <header className="rounded-2xl border bg-white p-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-green-800">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-green-800">{t("dashboard", "Dashboard")}</h1>
               <p className="text-gray-600">
-                <span className="mr-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Phase-1</span>
-                Live now: Expert (Soil & Weather) + Beginner (District & Season). Other modules are planned next.
+                <span className="mr-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{t("phase", "Phase-1")}</span>
+                {t("dashboard_sub", "Live now: Expert (Soil & Weather) + Beginner (District & Season). Other modules are planned next.")}
               </p>
 
               {/* ✅ NEW: live location badge */}
@@ -356,9 +359,9 @@ export default function Advisory(){
               )}
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-700">Crop Advisory</span>
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">Generative AI (Soon)</span>
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">Voice (Soon)</span>
+              <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-700">{t("crop_advisory", "Crop Advisory")}</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">{t("generative_ai", "Generative AI (Soon)")}</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">{t("voice_soon", "Voice (Soon)")}</span>
             </div>
           </div>
         </header>
@@ -371,7 +374,7 @@ export default function Advisory(){
             {mode === "expert" ? (
               <div className="flex flex-wrap gap-2">
                 <button className="rounded-lg border px-3 py-2 text-sm" onClick={prefillExpert}>
-                  Prefill Sample
+                  {t("prefill_sample", "Prefill Sample")}
                 </button>
 
                 {/* ✅ NEW: GPS + Weather autofill button */}
@@ -379,22 +382,22 @@ export default function Advisory(){
                   className="rounded-lg border px-3 py-2 text-sm"
                   onClick={fetchWeatherAutoFill}
                   disabled={loading}
-                  title="Auto-fill Temperature & Rainfall using your current location"
+                  title={t("auto_fill_title", "Auto-fill Temperature & Rainfall using your current location")}
                 >
-                  Auto Fill (Weather + GPS)
+                  {t("auto_fill", "Auto Fill (Weather + GPS)")}
                 </button>
 
                 <button className="rounded-lg border px-3 py-2 text-sm" onClick={resetExpert}>
-                  Reset
+                  {t("reset", "Reset")}
                 </button>
               </div>
             ) : (
               <div className="flex gap-2">
                 <button className="rounded-lg border px-3 py-2 text-sm" onClick={prefillBeginner}>
-                  Prefill Sample
+                  {t("prefill_sample", "Prefill Sample")}
                 </button>
                 <button className="rounded-lg border px-3 py-2 text-sm" onClick={resetBeginner}>
-                  Reset
+                  {t("reset", "Reset")}
                 </button>
               </div>
             )}
@@ -407,24 +410,24 @@ export default function Advisory(){
                 {FIELDS.map(f => (
                   <Field
                     key={f.key}
-                    label={f.label}
+                    label={t(f.key.toLowerCase(), f.label)}
                     name={f.key}
                     value={form[f.key]}
                     onChange={onChangeExpert}
                     error={errors[f.key]}
-                    placeholder={f.placeholder}
+                    placeholder={t(`${f.key.toLowerCase()}_placeholder`, f.placeholder)}
                   />
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button className="btn" onClick={submitExpert} disabled={loading}>
-                  {loading ? <Spinner text="Predicting..." /> : "Get Recommendation"}
+                  {loading ? <Spinner text={t("predicting", "Predicting...")} /> : t("get_recommendation", "Get Recommendation")}
                 </button>
                 <button
                   className="rounded-lg border px-4 py-2 text-sm"
                   onClick={() => { switchToBeginner(); }}
                 >
-                  Switch to Beginner
+                  {t("switch_to_beginner", "Switch to Beginner")}
                 </button>
               </div>
             </div>
@@ -446,7 +449,7 @@ export default function Advisory(){
                   value={beginnerForm.district}
                   onChange={onChangeBeginner}
                 >
-                  <option value="">Select District</option>
+                  <option value="">{t("select_district_option", "Select District")}</option>
                   {currentDistricts.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
 
@@ -456,20 +459,20 @@ export default function Advisory(){
                   value={beginnerForm.season}
                   onChange={onChangeBeginner}
                 >
-                  <option value="">Select Season</option>
+                  <option value="">{t("select_season_option", "Select Season")}</option>
                   {seasonalMeta.seasons.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <button className="btn" onClick={submitBeginner} disabled={loading}>
-                  {loading ? <Spinner text="Fetching..." /> : "Get Suggested Crops"}
+                  {loading ? <Spinner text={t("fetching", "Fetching...")} /> : t("get_suggested_crops", "Get Suggested Crops")}
                 </button>
                 <button
                   className="rounded-lg border px-4 py-2 text-sm"
                   onClick={() => { switchToExpert(); }}
                 >
-                  Switch to Expert
+                  {t("switch_to_expert", "Switch to Expert")}
                 </button>
               </div>
             </div>
@@ -479,15 +482,15 @@ export default function Advisory(){
         {/* Results Section - SIDE BY SIDE */}
         {result && !result.error && (result.recommended_crop || result.predicted_crop || result.recommended_crops) && (
           <div>
-            <h2 className="text-lg font-semibold text-green-700 mb-4">📊 Results</h2>
+            <h2 className="text-lg font-semibold text-green-700 mb-4">📊 {t("results", "Results")}</h2>
             <div className="grid gap-6 md:grid-cols-3">
               {/* Card 1: Recommended Crop */}
               <div className="card rounded-lg border border-green-200 bg-green-50">
-                <p className="text-sm text-gray-700 font-semibold">🌱 Recommended Crop</p>
+                <p className="text-sm text-gray-700 font-semibold">🌱 {t("recommended_crop", "Recommended Crop")}</p>
                 <p className="text-3xl font-bold text-green-700 mt-3">{result.recommended_crop || result.predicted_crop || "—"}</p>
                 {result.confidence && (
                   <p className="text-sm text-gray-600 mt-2">
-                    <span className="font-semibold text-green-600">Confidence:</span> {result.confidence}%
+                    <span className="font-semibold text-green-600">{t("confidence", "Confidence")}:</span> {result.confidence}%
                   </p>
                 )}
               </div>
@@ -495,7 +498,7 @@ export default function Advisory(){
               {/* Card 2: Top-3 Options */}
               {result.top_3 && Array.isArray(result.top_3) && result.top_3.length > 0 && (
                 <div className="card rounded-lg border border-blue-200 bg-blue-50">
-                  <p className="text-sm text-gray-700 font-semibold">🔄 Alternative Options</p>
+                  <p className="text-sm text-gray-700 font-semibold">🔄 {t("alternative_options", "Alternative Options")}</p>
                   <div className="space-y-2 mt-3">
                     {result.top_3.map((item, idx) => (
                       <div key={idx} className="text-xs">
@@ -518,13 +521,13 @@ export default function Advisory(){
               {/* Card 3: Fertilizer Recommendations */}
               {result.fertilizer && (
                 <div className="card rounded-lg border border-amber-200 bg-amber-50">
-                  <p className="text-sm text-gray-700 font-semibold">🌾 Fertilizer Status</p>
+                  <p className="text-sm text-gray-700 font-semibold">🌾 {t("fertilizer_status", "Fertilizer Status")}</p>
                   <div className="space-y-2 mt-3 text-xs">
                     {result.fertilizer.nutrients && (
                       <>
                         {result.fertilizer.nutrients.N && (
                           <div className="rounded bg-white p-2 border border-amber-100">
-                            <p className="font-semibold text-gray-800">Nitrogen (N)</p>
+                            <p className="font-semibold text-gray-800">{t("nitrogen", "Nitrogen (N)")}</p>
                             <p className="text-gray-600 text-[11px]">{result.fertilizer.nutrients.N.status.toUpperCase()}</p>
                             <p className="text-gray-500 text-[10px] mt-1">
                               {result.fertilizer.nutrients.N.value} / {result.fertilizer.nutrients.N.ideal_range[0]}-{result.fertilizer.nutrients.N.ideal_range[1]} kg/ha
@@ -533,7 +536,7 @@ export default function Advisory(){
                         )}
                         {result.fertilizer.nutrients.P && (
                           <div className="rounded bg-white p-2 border border-amber-100">
-                            <p className="font-semibold text-gray-800">Phosphorus (P)</p>
+                            <p className="font-semibold text-gray-800">{t("phosphorus", "Phosphorus (P)")}</p>
                             <p className="text-gray-600 text-[11px]">{result.fertilizer.nutrients.P.status.toUpperCase()}</p>
                             <p className="text-gray-500 text-[10px] mt-1">
                               {result.fertilizer.nutrients.P.value} / {result.fertilizer.nutrients.P.ideal_range[0]}-{result.fertilizer.nutrients.P.ideal_range[1]} kg/ha
@@ -542,7 +545,7 @@ export default function Advisory(){
                         )}
                         {result.fertilizer.nutrients.K && (
                           <div className="rounded bg-white p-2 border border-amber-100">
-                            <p className="font-semibold text-gray-800">Potassium (K)</p>
+                            <p className="font-semibold text-gray-800">{t("potassium", "Potassium (K)")}</p>
                             <p className="text-gray-600 text-[11px]">{result.fertilizer.nutrients.K.status.toUpperCase()}</p>
                             <p className="text-gray-500 text-[10px] mt-1">
                               {result.fertilizer.nutrients.K.value} / {result.fertilizer.nutrients.K.ideal_range[0]}-{result.fertilizer.nutrients.K.ideal_range[1]} kg/ha
@@ -559,7 +562,7 @@ export default function Advisory(){
             {/* Actions from Fertilizer */}
             {result.fertilizer?.recommendations && Array.isArray(result.fertilizer.recommendations) && (
               <div className="card mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-amber-800 mb-3">✅ Recommended Actions</p>
+                <p className="text-sm font-semibold text-amber-800 mb-3">✅ {t("recommended_actions", "Recommended Actions")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {result.fertilizer.recommendations.map((rec, idx) => (
                     <div key={idx} className="flex gap-2 text-sm text-gray-800">
@@ -577,7 +580,7 @@ export default function Advisory(){
         {result && !result.error && result.recommended_crops && Array.isArray(result.recommended_crops) && (
           <div className="card rounded-lg border border-green-200 bg-green-50 p-4">
             <p className="text-sm font-semibold text-green-800 mb-3">
-              🌾 Suggested Crops for {beginnerForm.district || "—"}, {beginnerForm.state} ({beginnerForm.season || "—"})
+              🌾 {t("suggested_crops_for", "Suggested Crops for")} {beginnerForm.district || "—"}, {beginnerForm.state} ({beginnerForm.season || "—"})
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {result.recommended_crops.map(c => (
@@ -601,8 +604,8 @@ export default function Advisory(){
           <div className="card rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
             <p className="text-sm text-gray-600">
               {mode === "expert"
-                ? "👉 Enter soil & weather values or click Prefill Sample, then Get Recommendation"
-                : "👉 Select district & season (or use Prefill Sample), then Get Suggested Crops"}
+                ? t("empty_expert", "👉 Enter soil & weather values or click Prefill Sample, then Get Recommendation")
+                : t("empty_beginner", "👉 Select district & season (or use Prefill Sample), then Get Suggested Crops")}
             </p>
           </div>
         )}
@@ -610,7 +613,7 @@ export default function Advisory(){
         {/* Raw JSON (debug) */}
         {result && (
           <details className="mt-6 rounded border bg-gray-50 p-3">
-            <summary className="cursor-pointer text-sm text-gray-600 font-semibold">📋 Raw JSON (debug)</summary>
+            <summary className="cursor-pointer text-sm text-gray-600 font-semibold">📋 {t("raw_json", "Raw JSON (debug)")}</summary>
             <pre className="mono text-xs overflow-auto mt-2">{JSON.stringify(result, null, 2)}</pre>
           </details>
         )}
@@ -618,7 +621,7 @@ export default function Advisory(){
         {/* History */}
         {history.length > 0 && (
           <div className="card">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">📜 History (Last 10)</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">📜 {t("history", "History (Last 10)")}</h3>
             <ul className="space-y-1 text-xs text-gray-600 max-h-48 overflow-auto">
               {history.map((h, i) => (
                 <li key={i} className="flex items-center justify-between border-b pb-2 last:border-b-0">
@@ -633,22 +636,22 @@ export default function Advisory(){
         {/* Future features (UI only) */}
         <section className="grid gap-4 md:grid-cols-3">
           {[
-            { icon:"🎨", title:"Gen-AI Awareness Posters", desc:"Auto-generate posters, slogans, tips for NGO drives", soon:true },
-            { icon:"🏛", title:"Government Scheme Simplifier", desc:"Explain schemes in simple local language", soon:true },
-            { icon:"🗣", title:"Voice Assistant (KN/HI/TE)", desc:"Ask in local language & hear answers", soon:true },
-            { icon:"🌐", title:"Multilingual UI", desc:"Localized interface & content", soon:true },
-            { icon:"📈", title:"Advisory History & Analytics", desc:"View previous queries & improvements", soon:true },
-            { icon:"🤝", title:"NGO Campaign Planner", desc:"Create shareable awareness campaigns", soon:true },
+            { icon:"🎨", titleKey:"future_genai_title", title:"Gen-AI Awareness Posters", descKey:"future_genai_desc", desc:"Auto-generate posters, slogans, tips for NGO drives" },
+            { icon:"🏛", titleKey:"future_scheme_title", title:"Government Scheme Simplifier", descKey:"future_scheme_desc", desc:"Explain schemes in simple local language" },
+            { icon:"🗣", titleKey:"future_voice_title", title:"Voice Assistant (KN/HI/TE)", descKey:"future_voice_desc", desc:"Ask in local language & hear answers" },
+            { icon:"🌐", titleKey:"future_multilingual_title", title:"Multilingual UI", descKey:"future_multilingual_desc", desc:"Localized interface & content" },
+            { icon:"📈", titleKey:"future_history_title", title:"Advisory History & Analytics", descKey:"future_history_desc", desc:"View previous queries & improvements" },
+            { icon:"🤝", titleKey:"future_ngo_title", title:"NGO Campaign Planner", descKey:"future_ngo_desc", desc:"Create shareable awareness campaigns" },
           ].map((f) => (
-            <div key={f.title} className="rounded-2xl border bg-white p-5 opacity-75">
+            <div key={f.titleKey} className="rounded-2xl border bg-white p-5 opacity-75">
               <div className="text-2xl">{f.icon}</div>
               <div className="mt-1 text-lg font-semibold text-gray-800">
-                {f.title}
+                {t(f.titleKey, f.title)}
                 <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                  Coming Soon
+                  {t("coming_soon", "Coming Soon")}
                 </span>
               </div>
-              <p className="mt-1 text-gray-700">{f.desc}</p>
+              <p className="mt-1 text-gray-700">{t(f.descKey, f.desc)}</p>
             </div>
           ))}
         </section>
