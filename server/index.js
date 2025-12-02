@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import authRoutes from "./src/routes/auth.js";
 import recommendRoutes from "./src/routes/recommend.js";
 import seasonalRoutes from "./src/routes/seasonal.js";
+import advisoryRoutes from "./src/routes/advisory.js";
 
 dotenv.config();
 
@@ -100,6 +101,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authRoutes);                // login/register
 app.use("/api/advisory", recommendRoutes);      // ML crop recommendation
 app.use("/api/advisory/seasonal", seasonalRoutes); // seasonal crops
+app.use("/api/advisory", advisoryRoutes); // Advisory Chatbot
 
 // Health check route
 app.get("/", (req, res) =>
