@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Awareness from "./pages/Awareness";
 import Schemes from "./pages/Schemes";
 import Voice from "./pages/Voice";
+import AdvisoryChat from "./components/AdvisoryChat";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       />
 
       {/* Optional placeholders */}
+      <Route path="/advisory-chat" element={<AdvisoryChat />} />
       <Route path="/awareness" element={<Awareness />} />
       <Route path="/schemes" element={<Schemes />} />
       <Route path="/voice" element={<Voice />} />
