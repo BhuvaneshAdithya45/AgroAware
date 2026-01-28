@@ -4,7 +4,7 @@ import express from "express";
 import Groq from "groq-sdk";
 const router = express.Router();
 
-const key = "###########"; // Add your groq API Key
+const key = process.env.GROQ_API_KEY; // Use environment variable
 const groq = new Groq({ apiKey: key });
 
 router.post("/chat", async (req, res) => {

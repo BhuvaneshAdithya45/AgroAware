@@ -147,3 +147,6 @@ AgroAware empowers farmers with:
 ## Dataset Source
 - The primary crop recommendation dataset was taken from Kaggle (https://www.kaggle.com/datasets/atharvaingle/crop-recommendation-dataset).
 - Additional fertilizer and weather mapping data was curated and cleaned as needed for the project.
+
+
+

@@ -1,0 +1,90 @@
+{
+  "base_models": {
+    "DecisionTree": {
+      "accuracy": 0.955,
+      "precision": 0.9775,
+      "recall": 0.9775,
+      "f1": 0.9775
+    },
+    "RandomForest": {
+      "accuracy": 0.955,
+      "precision": 0.9778,
+      "recall": 0.9756,
+      "f1": 0.9766
+    },
+    "LogisticRegression": {
+      "accuracy": 0.9238,
+      "precision": 0.906,
+      "recall": 0.8733,
+      "f1": 0.8791
+    },
+    "XGBoost": {
+      "accuracy": 0.9509,
+      "precision": 0.9771,
+      "recall": 0.9712,
+      "f1": 0.9735
+    }
+  },
+  "ensemble": {
+    "accuracy": 0.954,
+    "precision": 0.9798,
+    "recall": 0.9709,
+    "f1": 0.9739,
+    "weights": [
+      0.9775,
+      0.9766,
+      0.8791,
+      0.9735
+    ]
+  },
+  "features": [
+    "N",
+    "P",
+    "K",
+    "ph",
+    "temperature",
+    "rainfall"
+  ],
+  "label_classes": [
+    "banana",
+    "barley",
+    "bittergourd",
+    "blackgram",
+    "blackpepper",
+    "bottlegourd",
+    "brinjal",
+    "cabbage",
+    "cardamom",
+    "cauliflower",
+    "coriander",
+    "cotton",
+    "cucumber",
+    "drumstick",
+    "garlic",
+    "grapes",
+    "horsegram",
+    "jackfruit",
+    "jowar",
+    "jute",
+    "ladyfinger",
+    "maize",
+    "mango",
+    "moong",
+    "onion",
+    "orange",
+    "papaya",
+    "pineapple",
+    "potato",
+    "pumpkin",
+    "radish",
+    "ragi",
+    "rapeseed",
+    "rice",
+    "soyabean",
+    "sunflower",
+    "sweetpotato",
+    "tomato",
+    "turmeric",
+    "wheat"
+  ]
+}

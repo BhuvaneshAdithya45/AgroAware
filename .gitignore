@@ -27,11 +27,11 @@ dist/
 *.egg-info/
 
 # Data & Models
-ml_service/models/
-ml_service/reports/
-ml_service/data/*.csv
-ml_service/data/*.xlsx
-ml_service/data/*.json
+# ml_service/models/  # COMMENTED: Needed for teammates to run project
+# ml_service/reports/  # COMMENTED: Needed for teammates to run project
+# ml_service/data/*.csv  # COMMENTED: Needed for teammates to run project
+# ml_service/data/*.xlsx  # COMMENTED: Needed for teammates to run project
+# ml_service/data/*.json  # COMMENTED: Needed for teammates to run project
 
 # Sensitive
 *.key
