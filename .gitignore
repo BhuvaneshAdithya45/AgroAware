@@ -1,13 +1,18 @@
+# Node
+node_modules/
+.env
+
 # Python
 __pycache__/
 *.pyc
+.venv/
 venv/
-.env
 
-# ML artifacts
-*.pkl
+# ML artifacts (DO NOT COMMIT)
 ml_service/models/
+ml_service/reports/
 ml_service/uploads/
 
-# Node
-node_modules/
+# OS
+.DS_Store
+Thumbs.db
