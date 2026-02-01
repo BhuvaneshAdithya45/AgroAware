@@ -10,6 +10,7 @@ const SECTIONS = [
   { id: "videos",  label: "Videos" },
   { id: "faqs",    label: "FAQs" },
   { id: "contact", label: "Contact" },
+  
 ];
 
 export default function Navbar() {
@@ -56,51 +57,60 @@ export default function Navbar() {
 
         {/* Right: language + auth */}
         <div className="flex items-center gap-3 text-sm">
-          {/* Language selector */}
-          <label htmlFor="lang-select" className="sr-only">
-            {t("language")}
-          </label>
-          <select
-            id="lang-select"
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            className="rounded border px-2 py-1"
-            title={t("language")}
-            aria-label={t("language")}
-          >
-            <option value="en">EN</option>
-            <option value="kn">KN</option>
-            <option value="hi">HI</option>
-            <option value="te">TE</option>
-          </select>
+  {/* Language selector */}
+  <label htmlFor="lang-select" className="sr-only">
+    {t("language")}
+  </label>
+  <select
+    id="lang-select"
+    value={lang}
+    onChange={(e) => setLang(e.target.value)}
+    className="rounded border px-2 py-1"
+    title={t("language")}
+    aria-label={t("language")}
+  >
+    <option value="en">EN</option>
+    <option value="kn">KN</option>
+    <option value="hi">HI</option>
+    <option value="te">TE</option>
+  </select>
 
-          {!isAuthed ? (
-            <>
-              <button
-                onClick={to("/login")}
-                className="rounded-lg bg-green-700 px-4 py-2 text-white hover:bg-green-800"
-              >
-                {t("login")}
-              </button>
-              <button
-                onClick={to("/signup")}
-                className="rounded-lg border px-4 py-2 hover:border-green-700 hover:text-green-700"
-              >
-                {t("signup")}
-              </button>
-            </>
-          ) : (
-            <button
-              className="text-red-600 hover:underline"
-              onClick={() => {
-                localStorage.removeItem("token");
-                nav("/");
-              }}
-            >
-              {t("logout", "Logout")}
-            </button>
-          )}
-        </div>
+  {/* Chat button */}
+  <button
+    onClick={to("/advisory-chat")}
+    className="rounded-lg border border-green-700 px-3 py-1.5 text-green-700 hover:bg-green-700 hover:text-white transition"
+    title="Chat with AgroAware"
+  >
+    💬 {t("chat", "Chat")}
+  </button>
+
+  {!isAuthed ? (
+    <>
+      <button
+        onClick={to("/login")}
+        className="rounded-lg bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+      >
+        {t("login")}
+      </button>
+      <button
+        onClick={to("/signup")}
+        className="rounded-lg border px-4 py-2 hover:border-green-700 hover:text-green-700"
+      >
+        {t("signup")}
+      </button>
+    </>
+  ) : (
+    <button
+      className="text-red-600 hover:underline"
+      onClick={() => {
+        localStorage.removeItem("token");
+        nav("/");
+      }}
+    >
+      {t("logout", "Logout")}
+    </button>
+  )}
+</div>
       </div>
     </nav>
   );

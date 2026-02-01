@@ -7,10 +7,15 @@ export default function AdvisoryChat() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
+
+  // 🔹 NEW STATES
+  const [uploading, setUploading] = useState(false);
+  const [docUploaded, setDocUploaded] = useState(false);
+
   const bottomRef = useRef(null);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
     const userMsg = { role: "user", text: input };
     setMessages((prev) => [...prev, userMsg]);
@@ -18,27 +23,67 @@ export default function AdvisoryChat() {
     setInput("");
     setLoading(true);
 
-    const { data } = await API.post("/api/advisory/chat", {
-      question: userMsg.text,
-      language,
-    });
+    try {
+      const { data } = await API.post("/api/advisory/chat", {
+        question: userMsg.text,
+        language,
+      });
 
-    const botMsg = { role: "bot", text: data.answer };
-    setMessages((prev) => [...prev, botMsg]);
+      const botMsg = { role: "bot", text: data.answer };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: "Something went wrong. Please try again." },
+      ]);
+    }
 
     setLoading(false);
   };
 
+  // 🔹 DOCUMENT UPLOAD HANDLER
+  const uploadDocument = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await fetch("http://localhost:5000/api/advisory/rag-upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      setDocUploaded(true);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: "📄 Document uploaded successfully. You can now ask questions from it.",
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: "❌ Document upload failed." },
+      ]);
+    }
+
+    setUploading(false);
+  };
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, uploading]);
 
   return (
     <div className="min-h-screen flex flex-col bg-green-50">
       <Navbar />
 
-      {/* PAGE HEADER */}
-      <div className="mx-auto max-w-4xl w-full px-4 mt-6 flex justify-between">
+      {/* HEADER */}
+      <div className="mx-auto max-w-4xl w-full px-4 mt-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-green-700">
           AgroAware Advisory Chat
         </h1>
@@ -56,6 +101,32 @@ export default function AdvisoryChat() {
         </select>
       </div>
 
+      {/* DOCUMENT UPLOAD BAR */}
+      <div className="mx-auto max-w-4xl w-full px-4 mt-4">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <span className="px-4 py-2 rounded-lg bg-green-700 text-white text-sm hover:bg-green-800">
+            📄 Upload Advisory PDF
+          </span>
+
+          <input
+            type="file"
+            accept=".pdf"
+            hidden
+            onChange={(e) => uploadDocument(e.target.files[0])}
+          />
+
+          {uploading && (
+            <span className="text-sm text-gray-600">Uploading...</span>
+          )}
+
+          {docUploaded && !uploading && (
+            <span className="text-sm text-green-700">
+              ✔ Document ready
+            </span>
+          )}
+        </label>
+      </div>
+
       {/* CHAT AREA */}
       <div className="flex-1 mx-auto max-w-4xl w-full p-4 space-y-4 overflow-y-auto">
         {messages.map((m, i) => (
@@ -71,7 +142,7 @@ export default function AdvisoryChat() {
           </div>
         ))}
 
-        {loading && (
+        {(loading || uploading) && (
           <div className="mr-auto bg-white border p-3 rounded-xl text-gray-500">
             Typing...
           </div>
@@ -84,12 +155,17 @@ export default function AdvisoryChat() {
       <div className="mx-auto max-w-4xl w-full p-4 flex gap-3 bg-green-100">
         <input
           className="input flex-1"
-          placeholder="Ask for crop advice, fertilizer, pests, seasons..."
+          placeholder="Ask crop advice, fertilizer, pests, seasons..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          disabled={uploading}
         />
 
-        <button className="btn px-5" onClick={sendMessage}>
+        <button
+          className="btn px-5"
+          onClick={sendMessage}
+          disabled={loading || uploading}
+        >
           Send
         </button>
       </div>
