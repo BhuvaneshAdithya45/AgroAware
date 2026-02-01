@@ -36,6 +36,8 @@ const router = express.Router();
 /* -------------------- GROQ CHATBOT -------------------- */
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
+  
+
 });
 
 router.post("/chat", async (req, res) => {
