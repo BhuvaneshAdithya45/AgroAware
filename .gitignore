@@ -8,7 +8,7 @@ __pycache__/
 .venv/
 venv/
 
-# ML artifacts (DO NOT COMMIT)
+# ML artifacts (do not commit)
 ml_service/models/
 ml_service/reports/
 ml_service/uploads/
