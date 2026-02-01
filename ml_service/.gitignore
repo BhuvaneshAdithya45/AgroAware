@@ -2,3 +2,6 @@
 __pycache__/
 # models/  # COMMENTED: Needed for teammates to run project
 *.pyc
+# ML artifacts
+ml_service/models/
+ml_service/reports/
