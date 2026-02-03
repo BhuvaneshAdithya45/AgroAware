@@ -14,6 +14,8 @@ import advisoryRoutes from "./src/routes/advisory.js";
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /* ---------------------- Basic Security & Logging ---------------------- */
 app.use(helmet()); // secure HTTP headers
@@ -98,10 +100,19 @@ app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: true }));
 
 /* ---------------------- Routes ---------------------- */
-app.use("/api/auth", authRoutes);                // login/register
-app.use("/api/advisory", recommendRoutes);      // ML crop recommendation
-app.use("/api/advisory/seasonal", seasonalRoutes); // seasonal crops
-app.use("/api/advisory", advisoryRoutes); // Advisory Chatbot
+
+// Auth
+app.use("/api/auth", authRoutes);
+
+// 🔹 ML crop recommendation (numeric input → crop)
+app.use("/api/recommend", recommendRoutes);
+
+// 🔹 Seasonal crop info
+app.use("/api/advisory/seasonal", seasonalRoutes);
+
+// 🔹 Advisory chatbot + RAG + crop ML bridge
+app.use("/api/advisory", advisoryRoutes);
+
 
 // Health check route
 app.get("/", (req, res) =>
