@@ -69,3 +69,4 @@ Thumbs.db
 
 # Ignore embedded repo directory
 AgroAware/
+ml_service/models/ensemble_model.pkl
