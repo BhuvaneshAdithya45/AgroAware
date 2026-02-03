@@ -7,27 +7,16 @@ const router = express.Router();
 // required numeric fields expected by ML service
 const REQUIRED_FIELDS = ["N", "P", "K", "ph", "temperature", "rainfall"];
 
-// ML service base URL (can override with env var)
-const ML_BASE = process.env.ML_SERVICE_URL || "http://localhost:8800";
+// ML service base URL (resolved at request time so .env can be loaded before use)
+function getMLBase() {
+  // support either ML_SERVICE_URL (preferred) or legacy ML_API_URL
+  return process.env.ML_SERVICE_URL || process.env.ML_API_URL || "http://localhost:8000";
+}
 
 // helper to check numbers
 function isNumberLike(v) {
   return v !== null && v !== undefined && !Number.isNaN(Number(v));
 }
-
-/* ============ GET /list - Seasonal metadata ============ */
-router.get("/list", async (req, res) => {
-  try {
-    // Forward to seasonal service
-    const response = await axios.get("http://localhost:5000/api/advisory/seasonal/list", {
-      timeout: 5000
-    });
-    return res.json(response.data);
-  } catch (err) {
-    console.error("Error fetching seasonal metadata:", err?.message);
-    return res.status(500).json({ error: "Failed to fetch seasonal data" });
-  }
-});
 
 router.post("/crop", async (req, res) => {
   try {
@@ -74,13 +63,40 @@ router.post("/crop", async (req, res) => {
     console.log("Calling ML service with payload:", payload);
 
     // call ML service predict endpoint
-    const mlUrl = `${ML_BASE.replace(/\/$/, "")}/predict`; // ensures no double slashes
+    const mlBase = getMLBase();
+    const mlUrl = `${mlBase.replace(/\/$/, "")}/predict`; // ensures no double slashes
     const { data } = await axios.post(mlUrl, payload, {
       headers: { "Content-Type": "application/json" },
       timeout: 15000
     });
 
+    // ✅ NEW: Fetch fertilizer recommendations for the predicted crop
+    if (data.predicted_crop) {
+      try {
+        const fertilizerUrl = `${mlBase.replace(/\/$/, "")}/fertilizer`;
+        const fertilizerPayload = {
+          crop: data.predicted_crop,
+          N: payload.N,
+          P: payload.P,
+          K: payload.K
+        };
+        console.log("🌾 Fetching fertilizer for:", fertilizerPayload);
+        const { data: fertilizerData } = await axios.post(fertilizerUrl, fertilizerPayload, {
+          headers: { "Content-Type": "application/json" },
+          timeout: 10000
+        });
+        console.log("✅ Fertilizer data received:", fertilizerData);
+        // Attach fertilizer data to response
+        data.fertilizer = fertilizerData;
+      } catch (fertErr) {
+        console.warn("⚠️ Fertilizer fetch failed (non-blocking):", fertErr?.message);
+        console.warn("Response:", fertErr?.response?.data);
+        // Don't fail the whole request, just skip fertilizer
+      }
+    }
+
     // send result back to frontend
+    console.log("📤 Sending response with fertilizer:", { predicted_crop: data.predicted_crop, has_fertilizer: !!data.fertilizer });
     return res.json(data);
   } catch (err) {
     console.error("Error in /api/advisory/crop:", err?.message || err);
@@ -92,32 +108,6 @@ router.post("/crop", async (req, res) => {
       });
     }
     return res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/* ============ GET /weather - Real-time weather ============ */
-router.get("/weather", async (req, res) => {
-  try {
-    const { district } = req.query;
-    if (!district) {
-      return res.status(400).json({ error: "District parameter required" });
-    }
-
-    const apiKey = process.env.WEATHER_API_KEY || "cfedd2b10c42dd82a683ed537be2b883";
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(district)}&appid=${apiKey}&units=metric`;
-    
-    const { data } = await axios.get(weatherUrl, { timeout: 10000 });
-    
-    return res.json({
-      district: data.name,
-      temperature: data.main.temp,
-      humidity: data.main.humidity,
-      rainfall: data.clouds.all,
-      description: data.weather[0].description
-    });
-  } catch (err) {
-    console.error("Error fetching weather:", err?.message);
-    return res.status(500).json({ error: "Failed to fetch weather data" });
   }
 });
 

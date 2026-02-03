@@ -11,3 +11,12 @@ pydantic
 python-multipart
 matplotlib
 seaborn
+fastapi 
+uvicorn 
+python-multipart 
+numpy
+ pandas 
+ scikit-learn 
+ sentence-transformers
+  faiss-cpu 
+  pypdf

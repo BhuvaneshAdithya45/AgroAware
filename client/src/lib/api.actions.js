@@ -20,10 +20,10 @@ export const getCropRecommendation = (payload) =>
    SEASONAL ADVISORY (BEGINNER MODE)
 ====================================================== */
 export const getSeasonalCrops = (payload) =>
-  API.post("/api/advisory/seasonal/", payload);
+  API.post("/api/advisory/seasonal", payload);
 
 export const getSeasonalList = () =>
-  API.get("/api/advisory/list");
+  API.get("/api/advisory/seasonal/list");
 
 /* ======================================================
    FERTILIZER ADVICE (NEW - CALLS ML SERVICE DIRECT)
