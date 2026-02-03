@@ -1,71 +1,14 @@
 # Python
+venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.env
-.venv/
-venv/
-ENV/
-.env
-.env.*
-*.sqlite3
-
-# Jupyter
-.ipynb_checkpoints/
-
-# VSCode
-.vscode/
-.history/
 
 # Node
 node_modules/
 
-# Build
-build/
-dist/
-*.egg-info/
-
-# Data & Models
-# ml_service/models/  # COMMENTED: Needed for teammates to run project
-# ml_service/reports/  # COMMENTED: Needed for teammates to run project
-# ml_service/data/*.csv  # COMMENTED: Needed for teammates to run project
-# ml_service/data/*.xlsx  # COMMENTED: Needed for teammates to run project
-# ml_service/data/*.json  # COMMENTED: Needed for teammates to run project
-
-# Sensitive
-*.key
-*.pem
-*.crt
-*.pfx
-*.env
-secrets.*
-
-# Logs
-*.log
-nohup.out
+# Environment
+.env
+.env.*
 
 # OS
 .DS_Store
-Thumbs.db
-
-# Misc
-*.bak
-*.swp
-*.tmp
-
-# Ignore large files
-*.zip
-*.tar.gz
-*.tar
-*.rar
-*.7z
-*.gz
-*.bz2
-*.xz
-
-# Ignore test outputs
-/test-outputs/
-
-# Ignore embedded repo directory
-AgroAware/
