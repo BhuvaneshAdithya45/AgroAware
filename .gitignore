@@ -1,14 +1,18 @@
-# Python
-venv/
-__pycache__/
-*.pyc
-
 # Node
 node_modules/
 
-# Environment
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# ML generated
+ml_service/reports/
+ml_service/uploads/
+
+ml_service/data/
+ml_service/*.csv
+
+# Env
 .env
 .env.*
-
-# OS
-.DS_Store
