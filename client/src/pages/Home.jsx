@@ -182,7 +182,9 @@ export default function Home() {
                   titleKey: "feature_scheme_title",
                   title: "Scheme Simplifier",
                   titleChildren: (
-                    <Badge>{t("coming_soon", "Coming Soon")}</Badge>
+                    <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-700">
+                      {t("updated", "Updated")}
+                    </span>
                   ),
                   descKey: "feature_scheme_desc",
                   desc: "Plain-language summaries of government schemes.",

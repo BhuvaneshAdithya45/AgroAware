@@ -16,3 +16,5 @@ ml_service/*.csv
 # Env
 .env
 .env.*
+# ML models
+ml_service/models/*.pkl
