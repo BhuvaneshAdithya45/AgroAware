@@ -1,20 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.venv/
+
+# ML generated artifacts
+ml_service/models/*.pkl
+ml_service/reports/
+
+# RAG runtime data (PDF uploads)
+ml_service/uploads/
+
 # Node
 node_modules/
 
-# Python
-__pycache__/
-*.pyc
-venv/
-
-# ML generated
-ml_service/reports/
-ml_service/uploads/
-
-ml_service/data/
-ml_service/*.csv
-
 # Env
 .env
-.env.*
-# ML models
-ml_service/models/*.pkl
