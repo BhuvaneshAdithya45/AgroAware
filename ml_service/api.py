@@ -7,15 +7,31 @@ import numpy as np
 from pathlib import Path
 import os
 
-from rag.pdf_loader import load_pdf_text
+# RAG imports (lazy loaded for faster startup)
+rag_loaded = False
+load_pdf_text = None
+split_text = None
+embed_texts = None
+embed_query = None
+vector_store = None
+
+def load_rag_modules():
+    """Lazy load RAG modules when first needed"""
+    global rag_loaded, load_pdf_text, split_text, embed_texts, embed_query, vector_store
+    if not rag_loaded:
+        from rag.pdf_loader import load_pdf_text as _load_pdf
+        from rag.text_splitter import split_text as _split
+        from rag.embeddings import embed_texts as _embed_texts, embed_query as _embed_query
+        from rag.vector_store import vector_store as _store
+        load_pdf_text = _load_pdf
+        split_text = _split
+        embed_texts = _embed_texts
+        embed_query = _embed_query
+        vector_store = _store
+        rag_loaded = True
+        print("✅ RAG modules loaded")
+
 from fertilizer import get_fertilizer_recommendation
-
-from fertilizer import get_fertilizer_recommendation   # ✅ NEW
-
-from rag.text_splitter import split_text
-from rag.embeddings import embed_texts
-from rag.vector_store import vector_store
-from rag.embeddings import embed_query
 
 
 APP_DIR = Path(__file__).resolve().parent
@@ -28,7 +44,6 @@ MODEL_FILE = MODELS_DIR / "ensemble_model.pkl"
 SCALER_FILE = MODELS_DIR / "scaler.pkl"
 ENCODER_FILE = MODELS_DIR / "label_encoder.pkl"
 
-# ---------- Load Artifacts ----------
 # ---------- Load Artifacts ----------
 model = None
 scaler = None
@@ -82,15 +97,51 @@ class RagQuery(BaseModel):
     question: str
 
 
+# ---------- Input Validation ----------
+VALID_RANGES = {
+    "N":           {"min": 0,   "max": 300,  "unit": "kg/ha"},
+    "P":           {"min": 0,   "max": 200,  "unit": "kg/ha"},
+    "K":           {"min": 0,   "max": 300,  "unit": "kg/ha"},
+    "ph":          {"min": 3.0, "max": 10.0, "unit": "pH"},
+    "temperature": {"min": 5,   "max": 50,   "unit": "°C"},
+    "rainfall":    {"min": 10,  "max": 3000, "unit": "mm"},
+}
+
+def validate_inputs(data: CropInput):
+    """Check inputs against realistic agronomic ranges. Returns (errors, warnings)."""
+    errors = []
+    warnings = []
+    values = {"N": data.N, "P": data.P, "K": data.K,
+              "ph": data.ph, "temperature": data.temperature, "rainfall": data.rainfall}
+
+    for field, val in values.items():
+        r = VALID_RANGES[field]
+        # Hard errors — physically impossible
+        if val < 0:
+            errors.append(f"{field} cannot be negative (got {val})")
+        elif field == "ph" and (val < 0 or val > 14):
+            errors.append(f"pH must be between 0 and 14 (got {val})")
+        # Soft warnings — outside typical agronomic range
+        elif val < r["min"] or val > r["max"]:
+            warnings.append(
+                f"{field}={val} is outside typical range ({r['min']}–{r['max']} {r['unit']}). Prediction may be unreliable."
+            )
+    return errors, warnings
+
 
 # ---------- Routes ----------
 @app.get("/")
 def home():
-    return {"status": "✅ ML Service Running", "model": "Ensemble Soft Voting"}
+    return {"status": "✅ ML Service Running", "model": "Ensemble Soft Voting", "rag_enabled": True}
 
 
 @app.post("/predict")
 def predict(data: CropInput):
+    # ✅ Input validation
+    errors, warnings = validate_inputs(data)
+    if errors:
+        return {"status": "error", "message": "Invalid input: " + "; ".join(errors)}
+
     arr = np.array([[data.N, data.P, data.K, data.ph,
                      data.temperature, data.rainfall]])
 
@@ -109,11 +160,17 @@ def predict(data: CropInput):
             "confidence": round(confidence, 1)
         })
 
-    return {
+    result = {
         "predicted_crop": top3_crops[0]["crop"],
         "confidence": top3_crops[0]["confidence"],
         "top_3": top3_crops
     }
+
+    # Include warnings if any values were borderline
+    if warnings:
+        result["warnings"] = warnings
+
+    return result
 
 
 
@@ -123,8 +180,13 @@ def fertilizer(data: FertilizerInput):
     result = get_fertilizer_recommendation(data.crop, data.N, data.P, data.K)
     return result
 
+
+# ---------- RAG Routes ----------
 @app.post("/rag/upload")
 async def upload_document(file: UploadFile = File(...)):
+    """Upload and index a PDF document for RAG queries"""
+    load_rag_modules()
+    
     if not file.filename.lower().endswith(".pdf"):
         return {"status": "error", "message": "Only PDF files are supported"}
 
@@ -156,10 +218,13 @@ async def upload_document(file: UploadFile = File(...)):
 
 @app.post("/rag/ask")
 def ask_rag(query: RagQuery):
+    """Query the indexed documents using RAG"""
+    load_rag_modules()
+    
     if vector_store.embeddings is None:
         return {
             "status": "error",
-            "message": "No document indexed yet"
+            "message": "No document indexed yet. Please upload a PDF first."
         }
 
     # 1. Embed user question
@@ -174,5 +239,6 @@ def ask_rag(query: RagQuery):
     return {
         "status": "success",
         "question": query.question,
-        "context": context
+        "context": context,
+        "chunks_retrieved": len(relevant_chunks)
     }

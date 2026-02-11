@@ -127,7 +127,11 @@ router.post("/", async (req, res) => {
       season: match.season,
       recommended_crops: crops,
       primary_crop: match.primary_crop || "",
-      notes: match.notes || ""
+      notes: match.notes || "",
+      avg_n: match.avg_n || null,
+      avg_p: match.avg_p || null,
+      avg_k: match.avg_k || null,
+      avg_ph: match.avg_ph || null
     });
   } catch (err) {
     console.error("seasonal POST error:", err);

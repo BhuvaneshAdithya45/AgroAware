@@ -4,8 +4,9 @@ import en from "./en.json";
 import hi from "./hi.json";
 import kn from "./kn.json";
 import te from "./te.json";
+import ta from "./ta.json";
 
-const DICT = { en, hi, kn, te };
+const DICT = { en, hi, kn, te, ta };
 
 const LanguageContext = createContext(null);
 

@@ -41,6 +41,27 @@ def load_csvs():
     test_df  = pd.read_csv(TEST_CSV)
     return train_df, test_df
 
+
+def check_data_leak(train_df, test_df, features):
+    """Detect and remove overlapping rows between train and test sets."""
+    # Create string keys from feature columns for comparison
+    train_keys = set(train_df[features].round(4).astype(str).agg('|'.join, axis=1))
+    test_keys = test_df[features].round(4).astype(str).agg('|'.join, axis=1)
+
+    overlap_mask = test_keys.isin(train_keys)
+    overlap_count = overlap_mask.sum()
+
+    if overlap_count > 0:
+        overlap_pct = (overlap_count / len(test_df)) * 100
+        print(f"⚠️  DATA LEAK DETECTED: {overlap_count} test rows ({overlap_pct:.1f}%) also appear in training set!")
+        # Remove duplicates from test set
+        test_df_clean = test_df[~overlap_mask].reset_index(drop=True)
+        print(f"   ✅ Removed {overlap_count} duplicates. Test set: {len(test_df)} → {len(test_df_clean)} rows")
+        return test_df_clean
+    else:
+        print("✅ No data leak detected — train and test sets are independent.")
+        return test_df
+
 def pick_label_col(df):
     for col in LABEL_CANDIDATES:
         if col in df.columns:
@@ -451,6 +472,10 @@ def main():
 
     label = pick_label_col(train_df)
 
+    # ✅ Data leak check — detect and remove overlapping rows
+    print("\n🔍 Checking for train/test data leaks...")
+    test_df = check_data_leak(train_df, test_df, FEATURES)
+
     X_train = train_df[FEATURES].astype(float).values
     X_test  = test_df[FEATURES].astype(float).values
     y_train_raw = train_df[label].astype(str).values
@@ -524,9 +549,10 @@ def main():
     print(classification_report(y_test, ensemble_preds, target_names=encoder.classes_))
 
     print("\n💾 Saving Model Files...")
-    joblib.dump(ensemble, MODELS_DIR / "ensemble_model.pkl")
-    joblib.dump(scaler, MODELS_DIR / "scaler.pkl")
-    joblib.dump(encoder, MODELS_DIR / "label_encoder.pkl")
+    # ✅ Compressed saves — compress=3 reduces 107MB → ~10-20MB
+    joblib.dump(ensemble, MODELS_DIR / "ensemble_model.pkl", compress=3)
+    joblib.dump(scaler, MODELS_DIR / "scaler.pkl", compress=3)
+    joblib.dump(encoder, MODELS_DIR / "label_encoder.pkl", compress=3)
 
     # Save comprehensive training report
     training_report = {

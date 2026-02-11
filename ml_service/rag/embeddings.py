@@ -1,7 +1,8 @@
 from sentence_transformers import SentenceTransformer
 
 # Load once (important for speed)
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Force CPU mode to avoid CUDA issues
+model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
 
 
 def embed_texts(texts: list[str]):

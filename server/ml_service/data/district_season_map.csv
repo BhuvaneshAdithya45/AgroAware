@@ -1,77 +1,77 @@
-state,district,season,recommended_crops,primary_crop,notes
-Karnataka,Bengaluru,Kharif,Rice;Maize,Rice,Good rainfall region during monsoon
-Karnataka,Bengaluru,Rabi,Wheat;Sugarcane,Wheat,Cool-season crops preferred
-Karnataka,Mysuru,Kharif,Rice;Sorghum,Rice,Traditional paddy & jowar cultivation
-Karnataka,Mysuru,Rabi,Wheat;Ragi,Wheat,Winter crop cycle
-Karnataka,Bellary,Kharif,Sorghum;Groundnut,Sorghum,Suitable for dryland agriculture
-Karnataka,Kolar,Kharif,Rice;Maize,Rice,High-yield paddy zones
-Karnataka,Hassan,Rabi,Wheat;Ragi,Wheat,Preferred Rabi cereals
-Karnataka,Dharwad,Kharif,Maize;Sorghum,Maize,Hybrid maize varieties perform well
-Karnataka,Mandya,Kharif,Rice;Sugarcane,Rice,Sugarcane in irrigated belts
-Karnataka,Chitradurga,Rabi,Ragi;Wheat,Ragi,Millets recommended semi-arid area
-Maharashtra,Pune,Kharif,Rice;Soybean;Cotton,Soybean,Mixed cropping region
-Maharashtra,Pune,Rabi,Wheat;Gram;Onion,Wheat,Rabi cash crops
-Maharashtra,Nagpur,Kharif,Cotton;Soybean;Tur,Cotton,Major cotton belt
-Maharashtra,Nagpur,Rabi,Wheat;Gram,Wheat,Medium rainfall suited to wheat
-Maharashtra,Nashik,Kharif,Maize;Rice;Soybean,Maize,Western Ghats influence
-Maharashtra,Nashik,Rabi,Wheat;Onion,Wheat,Horticulture and Rabi crops
-Tamil Nadu,Chennai,Kharif,Rice;Maize,Rice,Delta irrigation region
-Tamil Nadu,Chennai,Rabi,Groundnut;Sesame,Groundnut,Winter oilseed season
-Tamil Nadu,Coimbatore,Kharif,Maize;Cotton,Maize,Dry crop region
-Tamil Nadu,Coimbatore,Rabi,Wheat;Pulses,Pulses,Minor Rabi coverage
-Tamil Nadu,Madurai,Kharif,Rice;Millets,Rice,Good monsoon
-Tamil Nadu,Madurai,Rabi,Pulses;Groundnut,Pulses,Dryland farming
-Telangana,Hyderabad,Kharif,Rice;Maize;Cotton,Rice,Monsoon irrigation farming
-Telangana,Hyderabad,Rabi,Gram;Wheat;Pulses,Gram,Moderate rainfall crops
-Telangana,Warangal,Kharif,Cotton;Rice,Cotton,Deccan cotton belt
-Telangana,Warangal,Rabi,Maize;Wheat,Maize,Dry-season cereal crops
-Andhra Pradesh,Vizianagaram,Kharif,Rice;Maize,Rice,Monsoon paddy
-Andhra Pradesh,Vizianagaram,Rabi,Groundnut;Pulses,Groundnut,Coastal plains
-Andhra Pradesh,Guntur,Kharif,Rice;Cotton,Rice,Krishna basin delta
-Andhra Pradesh,Guntur,Rabi,Maize;Pulses,Maize,Rabi cereals
-Kerala,Ernakulam,Kharif,Rice;Coconut,Rice,High rainfall coastal
-Kerala,Ernakulam,Rabi,Rice;Vegetables,Rice,Short Rabi cycle
-Kerala,Kozhikode,Kharif,Rice;Banana;Tapioca,Rice,High humidity
-Kerala,Kozhikode,Rabi,Rice;Vegetables,Rice,Short Rabi window
-Gujarat,Ahmedabad,Kharif,Cotton;Groundnut,Cotton,Black soil suitable for cotton
-Gujarat,Ahmedabad,Rabi,Wheat;Mustard,Wheat,Rabi irrigated
-Gujarat,Rajkot,Kharif,Groundnut;Cotton,Groundnut,Saurashtra crops
-Gujarat,Rajkot,Rabi,Wheat;Cumin,Wheat,Winter cash crops
-Punjab,Ludhiana,Kharif,Rice;Maize,Rice,Extensive canal irrigation
-Punjab,Ludhiana,Rabi,Wheat;Barley,Wheat,High productivity region
-Punjab,Amritsar,Kharif,Rice;Maize,Rice,Major rice zone
-Punjab,Amritsar,Rabi,Wheat;Mustard,Wheat,Winter cereals dominate
-Haryana,Hisar,Kharif,Bajra;Rice;Cotton,Bajra,Arid climate
-Haryana,Hisar,Rabi,Wheat;Gram;Mustard,Wheat,Rabi double cropping
-Uttar Pradesh,Kanpur,Kharif,Rice;Maize,Rice,Monsoon crops
-Uttar Pradesh,Kanpur,Rabi,Wheat;Gram,Wheat,Major wheat belt
-Uttar Pradesh,Varanasi,Kharif,Rice;Maize,Rice,Ganga plain
-Uttar Pradesh,Varanasi,Rabi,Wheat;Lentil,Wheat,Winter crops
-Madhya Pradesh,Bhopal,Kharif,Soybean;Rice,Soybean,Central India monsoon
-Madhya Pradesh,Bhopal,Rabi,Wheat;Gram,Wheat,Dry Rabi
-Madhya Pradesh,Indore,Kharif,Soybean;Maize,Soybean,High-yield zone
-Madhya Pradesh,Indore,Rabi,Wheat;Lentil,Wheat,Rabi cereal
-Bihar,Patna,Kharif,Rice;Maize,Rice,Floodplain cropping
-Bihar,Patna,Rabi,Wheat;Lentil,Wheat,Short Rabi
-Bihar,Gaya,Kharif,Rice;Maize,Rice,Monsoon agriculture
-Bihar,Gaya,Rabi,Wheat;Gram,Wheat,Winter cultivation
-West Bengal,Kolkata,Kharif,Rice;Jute,Rice,Delta crops
-West Bengal,Kolkata,Rabi,Wheat;Potato,Wheat,Intensive cropping
-West Bengal,Darjeeling,Kharif,Maize;Rice,Maize,Hilly monsoon crops
-West Bengal,Darjeeling,Rabi,Barley;Wheat,Barley,Cool climate crops
-Odisha,Bhubaneswar,Kharif,Rice;Pulses,Rice,Coastal paddy
-Odisha,Bhubaneswar,Rabi,Wheat;Groundnut,Wheat,Coastal plains Rabi
-Odisha,Cuttack,Kharif,Rice;Jute,Rice,Delta region
-Odisha,Cuttack,Rabi,Wheat;Lentil,Wheat,Winter crops
-Rajasthan,Jaipur,Kharif,Bajra;Maize,Bajra,Arid farming
-Rajasthan,Jaipur,Rabi,Mustard;Wheat,Mustard,Oilseed belt
-Rajasthan,Udaipur,Kharif,Maize;Rice,Maize,Tribal monsoon region
-Rajasthan,Udaipur,Rabi,Wheat;Gram,Wheat,Moderate Rabi
-Assam,Guwahati,Kharif,Rice;Jute,Rice,High rainfall deltaic region
-Assam,Guwahati,Rabi,Rice;Pulses,Rice,Double rice cropping possible
-Assam,Sivasagar,Kharif,Rice;Tea;Jute,Rice,Tea belt region
-Assam,Sivasagar,Rabi,Rice;Vegetables,Rice,Rabi horticulture
-Jharkhand,Ranchi,Kharif,Rice;Maize,Rice,Tribal region rainfed
-Jharkhand,Ranchi,Rabi,Wheat;Gram,Wheat,Dry winter crops
-Chhattisgarh,Raipur,Kharif,Rice;Maize,Rice,Chhattisgarh rice bowl
-Chhattisgarh,Raipur,Rabi,Wheat;Gram,Wheat,Post-monsoon cropping
+state,district,season,recommended_crops,primary_crop,notes,avg_N,avg_P,avg_K,avg_ph
+Karnataka,Bengaluru,Kharif,Rice;Maize,Rice,Good rainfall region during monsoon,85,45,40,6.5
+Karnataka,Bengaluru,Rabi,Wheat;Sugarcane,Wheat,Cool-season crops preferred,70,40,35,6.7
+Karnataka,Mysuru,Kharif,Rice;Sorghum,Rice,Traditional paddy & jowar cultivation,90,50,45,6.8
+Karnataka,Mysuru,Rabi,Wheat;Ragi,Wheat,Winter crop cycle,75,45,40,6.6
+Karnataka,Bellary,Kharif,Sorghum;Groundnut,Sorghum,Suitable for dryland agriculture,60,35,30,7.2
+Karnataka,Kolar,Kharif,Rice;Maize,Rice,High-yield paddy zones,95,55,50,6.4
+Karnataka,Hassan,Rabi,Wheat;Ragi,Wheat,Preferred Rabi cereals,70,40,35,6.5
+Karnataka,Dharwad,Kharif,Maize;Sorghum,Maize,Hybrid maize varieties perform well,80,45,40,7.0
+Karnataka,Mandya,Kharif,Rice;Sugarcane,Rice,Sugarcane in irrigated belts,100,60,55,6.9
+Karnataka,Chitradurga,Rabi,Ragi;Wheat,Ragi,Millets recommended semi-arid area,65,40,35,7.3
+Maharashtra,Pune,Kharif,Rice;Soybean;Cotton,Soybean,Mixed cropping region,85,45,42,6.8
+Maharashtra,Pune,Rabi,Wheat;Gram;Onion,Wheat,Rabi cash crops,75,40,38,6.7
+Maharashtra,Nagpur,Kharif,Cotton;Soybean;Tur,Cotton,Major cotton belt,90,50,48,7.2
+Maharashtra,Nagpur,Rabi,Wheat;Gram,Wheat,Medium rainfall suited to wheat,80,45,42,7.1
+Maharashtra,Nashik,Kharif,Maize;Rice;Soybean,Maize,Western Ghats influence,80,48,44,6.5
+Maharashtra,Nashik,Rabi,Wheat;Onion,Wheat,Horticulture and Rabi crops,75,45,40,6.6
+Tamil Nadu,Chennai,Kharif,Rice;Maize,Rice,Delta irrigation region,95,50,45,6.7
+Tamil Nadu,Chennai,Rabi,Groundnut;Sesame,Groundnut,Winter oilseed season,70,45,40,6.8
+Tamil Nadu,Coimbatore,Kharif,Maize;Cotton,Maize,Dry crop region,85,45,40,7.1
+Tamil Nadu,Coimbatore,Rabi,Wheat;Pulses,Pulses,Minor Rabi coverage,65,40,35,7.2
+Tamil Nadu,Madurai,Kharif,Rice;Millets,Rice,Good monsoon,90,48,44,6.9
+Tamil Nadu,Madurai,Rabi,Pulses;Groundnut,Pulses,Dryland farming,60,40,36,7.0
+Telangana,Hyderabad,Kharif,Rice;Maize;Cotton,Rice,Monsoon irrigation farming,95,52,48,6.8
+Telangana,Hyderabad,Rabi,Gram;Wheat;Pulses,Gram,Moderate rainfall crops,75,45,42,6.9
+Telangana,Warangal,Kharif,Cotton;Rice,Cotton,Deccan cotton belt,92,50,46,7.1
+Telangana,Warangal,Rabi,Maize;Wheat,Maize,Dry-season cereal crops,80,45,40,7.0
+Andhra Pradesh,Vizianagaram,Kharif,Rice;Maize,Rice,Monsoon paddy,90,48,42,6.5
+Andhra Pradesh,Vizianagaram,Rabi,Groundnut;Pulses,Groundnut,Coastal plains,70,42,38,6.6
+Andhra Pradesh,Guntur,Kharif,Rice;Cotton,Rice,Krishna basin delta,100,55,50,7.0
+Andhra Pradesh,Guntur,Rabi,Maize;Pulses,Maize,Rabi cereals,85,48,44,7.1
+Kerala,Ernakulam,Kharif,Rice;Coconut,Rice,High rainfall coastal,80,40,35,5.5
+Kerala,Ernakulam,Rabi,Rice;Vegetables,Rice,Short Rabi cycle,70,38,32,5.7
+Kerala,Kozhikode,Kharif,Rice;Banana;Tapioca,Rice,High humidity,85,42,38,5.8
+Kerala,Kozhikode,Rabi,Rice;Vegetables,Rice,Short Rabi window,75,40,35,5.9
+Gujarat,Ahmedabad,Kharif,Cotton;Groundnut,Cotton,Black soil suitable for cotton,95,55,50,7.8
+Gujarat,Ahmedabad,Rabi,Wheat;Mustard,Wheat,Rabi irrigated,85,50,45,7.7
+Gujarat,Rajkot,Kharif,Groundnut;Cotton,Groundnut,Saurashtra crops,90,52,48,7.9
+Gujarat,Rajkot,Rabi,Wheat;Cumin,Wheat,Winter cash crops,80,48,44,8.0
+Punjab,Ludhiana,Kharif,Rice;Maize,Rice,Extensive canal irrigation,110,60,55,7.2
+Punjab,Ludhiana,Rabi,Wheat;Barley,Wheat,High productivity region,100,55,50,7.1
+Punjab,Amritsar,Kharif,Rice;Maize,Rice,Major rice zone,105,58,52,7.3
+Punjab,Amritsar,Rabi,Wheat;Mustard,Wheat,Winter cereals dominate,95,52,48,7.2
+Haryana,Hisar,Kharif,Bajra;Rice;Cotton,Bajra,Arid climate,70,40,35,8.1
+Haryana,Hisar,Rabi,Wheat;Gram;Mustard,Wheat,Rabi double cropping,85,48,42,8.0
+Uttar Pradesh,Kanpur,Kharif,Rice;Maize,Rice,Monsoon crops,95,52,48,7.4
+Uttar Pradesh,Kanpur,Rabi,Wheat;Gram,Wheat,Major wheat belt,90,50,45,7.3
+Uttar Pradesh,Varanasi,Kharif,Rice;Maize,Rice,Ganga plain,100,55,50,7.2
+Uttar Pradesh,Varanasi,Rabi,Wheat;Lentil,Wheat,Winter crops,90,50,46,7.1
+Madhya Pradesh,Bhopal,Kharif,Soybean;Rice,Soybean,Central India monsoon,80,45,40,7.0
+Madhya Pradesh,Bhopal,Rabi,Wheat;Gram,Wheat,Dry Rabi,75,42,38,7.1
+Madhya Pradesh,Indore,Kharif,Soybean;Maize,Soybean,High-yield zone,85,48,42,6.8
+Madhya Pradesh,Indore,Rabi,Wheat;Lentil,Wheat,Rabi cereal,80,45,40,6.9
+Bihar,Patna,Kharif,Rice;Maize,Rice,Floodplain cropping,100,52,48,6.7
+Bihar,Patna,Rabi,Wheat;Lentil,Wheat,Short Rabi,85,48,44,6.8
+Bihar,Gaya,Kharif,Rice;Maize,Rice,Monsoon agriculture,90,48,42,6.5
+Bihar,Gaya,Rabi,Wheat;Gram,Wheat,Winter cultivation,80,45,40,6.6
+West Bengal,Kolkata,Kharif,Rice;Jute,Rice,Delta crops,105,55,50,6.2
+West Bengal,Kolkata,Rabi,Wheat;Potato,Wheat,Intensive cropping,90,50,45,6.3
+West Bengal,Darjeeling,Kharif,Maize;Rice,Maize,Hilly monsoon crops,75,40,35,5.2
+West Bengal,Darjeeling,Rabi,Barley;Wheat,Barley,Cool climate crops,65,38,32,5.4
+Odisha,Bhubaneswar,Kharif,Rice;Pulses,Rice,Coastal paddy,95,50,45,6.0
+Odisha,Bhubaneswar,Rabi,Wheat;Groundnut,Wheat,Coastal plains Rabi,80,45,42,6.1
+Odisha,Cuttack,Kharif,Rice;Jute,Rice,Delta region,100,52,48,6.2
+Odisha,Cuttack,Rabi,Wheat;Lentil,Wheat,Winter crops,85,48,44,6.3
+Rajasthan,Jaipur,Kharif,Bajra;Maize,Bajra,Arid farming,60,35,30,8.2
+Rajasthan,Jaipur,Rabi,Mustard;Wheat,Mustard,Oilseed belt,75,42,38,8.1
+Rajasthan,Udaipur,Kharif,Maize;Rice,Maize,Tribal monsoon region,80,45,40,7.5
+Rajasthan,Udaipur,Rabi,Wheat;Gram,Wheat,Moderate Rabi,75,42,38,7.4
+Assam,Guwahati,Kharif,Rice;Jute,Rice,High rainfall deltaic region,90,45,40,5.6
+Assam,Guwahati,Rabi,Rice;Pulses,Rice,Double rice cropping possible,80,42,38,5.8
+Assam,Sivasagar,Kharif,Rice;Tea;Jute,Rice,Tea belt region,85,40,36,5.4
+Assam,Sivasagar,Rabi,Rice;Vegetables,Rice,Rabi horticulture,75,38,34,5.6
+Jharkhand,Ranchi,Kharif,Rice;Maize,Rice,Tribal region rainfed,85,45,40,5.8
+Jharkhand,Ranchi,Rabi,Wheat;Gram,Wheat,Dry winter crops,75,42,38,6.0
+Chhattisgarh,Raipur,Kharif,Rice;Maize,Rice,Chhattisgarh rice bowl,110,55,50,6.5
+Chhattisgarh,Raipur,Rabi,Wheat;Gram,Wheat,Post-monsoon cropping,95,50,45,6.6
