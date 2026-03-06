@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import Navbar from '../components/Navbar';
 import { useTranslation } from '../i18n';
 
@@ -348,6 +349,40 @@ export default function Awareness() {
   const [posterLoading, setPosterLoading] = useState(false);
   const [posterImageLoaded, setPosterImageLoaded] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [posterHistory, setPosterHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('agroaware_poster_history') || '[]'); } catch { return []; }
+  });
+  const [showHistory, setShowHistory] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const posterRef = useRef(null);
+
+  const savePosterToHistory = (topic, data) => {
+    const entry = { topic, caption: data.caption, imageUrl: data.imageUrl, timestamp: Date.now() };
+    const updated = [entry, ...posterHistory].slice(0, 5);
+    setPosterHistory(updated);
+    localStorage.setItem('agroaware_poster_history', JSON.stringify(updated));
+  };
+
+  const downloadPoster = async () => {
+    if (!posterRef.current) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(posterRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+      const link = document.createElement('a');
+      link.download = `agroaware-poster-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     let interval;
@@ -419,6 +454,7 @@ export default function Awareness() {
       });
       const data = await res.json();
       setPosterData(data);
+      if (!data.error) savePosterToHistory(topic, data);
     } catch {
       setPosterData({ error: 'Poster generation failed. Please try again.' });
     } finally {
@@ -509,7 +545,7 @@ export default function Awareness() {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-gradient-to-br from-purple-500 to-indigo-500 w-10 h-10 rounded-full flex items-center justify-center shadow-lg">🤖</div>
                   <div>
-                    <span className="block text-xs font-bold uppercase tracking-wider text-indigo-300">Question</span>
+                    <span className="block text-xs font-bold uppercase tracking-wider text-indigo-300">{t("ai_question_label", "Question")}</span>
                     <span className="font-bold text-lg">{aiTopic}</span>
                   </div>
                 </div>
@@ -566,11 +602,10 @@ export default function Awareness() {
 
             {/* Poster Result */}
             {posterData && !posterData.error && (
-              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-2xl text-gray-900 animate-scale-in">
+              <div ref={posterRef} className="bg-white rounded-3xl p-6 md:p-8 shadow-2xl text-gray-900 animate-scale-in">
                 <h3 className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">{t("poster_preview", "Generated Poster Preview")}</h3>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div className="relative group rounded-2xl overflow-hidden shadow-lg">
-                    {/* Image Loader */}
                     {!posterImageLoaded && (
                       <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center text-gray-400 font-medium">{t("poster_loading_image", "Loading Image...")}</div>
                     )}
@@ -605,20 +640,46 @@ export default function Awareness() {
                         )}
 
                         <div className="pt-4">
-                          <a
-                            href={posterData.imageUrl}
-                            download={`agroaware-poster-${Date.now()}.png`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                          <button
+                            onClick={downloadPoster}
+                            disabled={downloading}
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:opacity-60"
                           >
-                            📥 {t("poster_download", "Download Poster")}
-                          </a>
+                            {downloading ? '⏳' : '📥'} {downloading ? t("poster_downloading", "Saving...") : t("poster_download", "Download Poster")}
+                          </button>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Poster History */}
+            {posterHistory.length > 0 && (
+              <div className="mt-8">
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="flex items-center gap-2 text-rose-100 hover:text-white font-semibold transition-colors"
+                >
+                  <span className={`transition-transform duration-300 ${showHistory ? 'rotate-180' : ''}`}>▼</span>
+                  📋 {t("poster_history_title", "Recent Posters")} ({posterHistory.length})
+                </button>
+                {showHistory && (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4 animate-fade-in-up">
+                    {posterHistory.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => { setPosterData(item); setPosterTopic(item.topic); setPosterImageLoaded(false); }}
+                        className="bg-white/10 backdrop-blur rounded-xl p-3 text-left hover:bg-white/20 transition-all border border-white/10 group"
+                      >
+                        <img src={item.imageUrl} alt={item.topic} className="w-full h-20 object-cover rounded-lg mb-2 opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <p className="text-xs font-medium text-rose-100 truncate">{item.caption?.title || item.topic}</p>
+                        <p className="text-[10px] text-rose-300 mt-1">{new Date(item.timestamp).toLocaleDateString()}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

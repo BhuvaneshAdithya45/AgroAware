@@ -45,7 +45,7 @@ function isSchemeQuestion(question) {
 
 async function tryRag(question) {
   try {
-    const res = await fetch("http://127.0.0.1:8000/rag/ask", {
+    const res = await fetch("http://127.0.0.1:8800/rag/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question }),
