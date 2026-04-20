@@ -49,12 +49,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center font-sans">
-      {/* Background */}
+    <div className="min-h-screen relative flex items-center justify-center font-sans" style={{ backgroundColor: '#312e81' }}>
+      {/* Background — CSS gradient fallback if image fails */}
       <img
         src="https://images.unsplash.com/photo-1592982537447-6f2a6a0c7c18?q=80&w=2600&auto=format&fit=crop"
-        alt="Farming Background"
+        alt=""
         className="absolute inset-0 h-full w-full object-cover"
+        onError={(e) => { e.target.style.display = 'none'; }}
+        loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/90 to-purple-900/90" /> {/* Different gradient for Signup */}
 
@@ -119,7 +121,7 @@ export default function Signup() {
             </div>
 
             <button className="w-full py-3.5 rounded-xl bg-white text-purple-900 font-bold hover:bg-purple-50 transition-all shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-70 mt-4" disabled={loading}>
-              {loading ? 'Creating Account...' : t("signup", "Sign up")}
+              {loading ? t("creating_account", "Creating Account...") : t("signup", "Sign up")}
             </button>
           </form>
 

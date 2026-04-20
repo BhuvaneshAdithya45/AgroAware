@@ -4,6 +4,7 @@ import API from "../lib/api";
 import Navbar from "./Navbar";
 import SpeakerButton from "./SpeakerButton";
 import MicrophoneButton from "./MicrophoneButton";
+import FeedbackButtons from "./FeedbackButtons";
 import { useTranslation } from "../i18n";
 
 export default function AdvisoryChat() {
@@ -39,7 +40,7 @@ export default function AdvisoryChat() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: t("error_msg", "Something went wrong. Please try again.") },
+        { role: "bot", text: t("error_msg", "Something went wrong on our end. Please check your internet or try again later.") },
       ]);
     }
 
@@ -56,9 +57,13 @@ export default function AdvisoryChat() {
     formData.append("file", file);
 
     try {
-      await fetch("http://localhost:5000/api/advisory/rag-upload", {
+      const token = localStorage.getItem("token");
+      await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/advisory/rag-upload`, {
         method: "POST",
         body: formData,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
 
       setDocUploaded(true);
@@ -84,12 +89,12 @@ export default function AdvisoryChat() {
   }, [messages, loading, uploading]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-green-50">
-      <Navbar />
+    <div className={`min-h-screen flex flex-col ${window.location.search.includes('embedded=true') ? 'bg-white' : 'bg-green-50'}`}>
+      {!window.location.search.includes('embedded=true') && <Navbar />}
 
       {/* HEADER */}
-      <div className="mx-auto max-w-4xl w-full px-4 mt-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-green-700">
+      <div className={`mx-auto max-w-4xl w-full px-4 ${window.location.search.includes('embedded=true') ? 'mt-4' : 'mt-6'} flex justify-between items-center`}>
+        <h1 className={`${window.location.search.includes('embedded=true') ? 'text-lg' : 'text-2xl'} font-bold text-green-700`}>
           {t("advisory_chat_title", "AgroAware Advisory Chat")}
         </h1>
       </div>
@@ -134,8 +139,8 @@ export default function AdvisoryChat() {
           <div
             key={i}
             className={`p-3 rounded-xl max-w-[80%] ${m.role === "user"
-                ? "bg-green-200 ml-auto text-right"
-                : "bg-white border text-gray-800 mr-auto"
+              ? "bg-green-200 ml-auto text-right"
+              : "bg-white border text-gray-800 mr-auto"
               }`}
           >
             <div className="flex items-start gap-3">
@@ -145,6 +150,15 @@ export default function AdvisoryChat() {
                 <SpeakerButton text={m.text} language={lang} size="sm" />
               )}
             </div>
+            {/* 👍👎 Feedback buttons for bot messages */}
+            {m.role === "bot" && (
+              <FeedbackButtons
+                feature="chat"
+                question={messages[i - 1]?.text || ""}
+                answer={m.text}
+                language={lang}
+              />
+            )}
           </div>
         ))}
 

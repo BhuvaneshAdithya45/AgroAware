@@ -16,12 +16,12 @@ import { INDIAN_STATES_DISTRICTS } from "../data/districts";
    CONFIG
 ========================= */
 const FIELDS = [
-  { key: "N", label: "Nitrogen (N)", placeholder: "e.g. 50", icon: "🧪" },
-  { key: "P", label: "Phosphorus (P)", placeholder: "e.g. 40", icon: "🔬" },
-  { key: "K", label: "Potassium (K)", placeholder: "e.g. 35", icon: "⚗️" },
-  { key: "ph", label: "Soil pH", placeholder: "e.g. 6.8", icon: "🌡️" },
-  { key: "temperature", label: "Temperature (°C)", placeholder: "e.g. 26", icon: "☀️" },
-  { key: "rainfall", label: "Rainfall (mm)", placeholder: "e.g. 120", icon: "🌧️" },
+  { key: "N", labelKey: "nitrogen", label: "Nitrogen (N)", placeholder: "e.g. 50", icon: "🧪" },
+  { key: "P", labelKey: "phosphorus", label: "Phosphorus (P)", placeholder: "e.g. 40", icon: "🔬" },
+  { key: "K", labelKey: "potassium", label: "Potassium (K)", placeholder: "e.g. 35", icon: "⚗️" },
+  { key: "ph", labelKey: "soil_ph", label: "Soil pH", placeholder: "e.g. 6.8", icon: "🌡️" },
+  { key: "temperature", labelKey: "temperature", label: "Temperature (°C)", placeholder: "e.g. 26", icon: "☀️" },
+  { key: "rainfall", labelKey: "rainfall", label: "Rainfall (mm)", placeholder: "e.g. 120", icon: "🌧️" },
 ];
 
 const KA_DISTRICTS = [
@@ -35,7 +35,7 @@ export default function CropAdvisory() {
   const toast = useToast();
 
   const [mode, setMode] = useState("expert");
-  const [form, setForm] = useState(Object.fromEntries(FIELDS.map(f => [f.key, ""])));
+  const [form, setForm] = useState({ ...Object.fromEntries(FIELDS.map(f => [f.key, ""])), season: "Kharif" });
   const [errors, setErrors] = useState({});
   const [beginnerForm, setBeginnerForm] = useState({ state: "Karnataka", district: "", season: "" });
   const [loading, setLoading] = useState(false);
@@ -94,7 +94,7 @@ export default function CropAdvisory() {
   };
 
   const prefillExpert = () => {
-    setForm({ N: "60", P: "45", K: "40", ph: "6.7", temperature: "27", rainfall: "110" });
+    setForm({ N: "60", P: "45", K: "40", ph: "6.7", temperature: "27", rainfall: "110", season: "Kharif" });
     setErrors({});
     setResult(null);
   };
@@ -106,10 +106,11 @@ export default function CropAdvisory() {
       const payload = {
         N: Number(form.N), P: Number(form.P), K: Number(form.K),
         ph: Number(form.ph), temperature: Number(form.temperature), rainfall: Number(form.rainfall),
+        season: form.season || "Kharif"
       };
       const { data } = await getCropRecommendation(payload);
       setResult(data);
-      toast.success(`Recommended: ${data.predicted_crop || "crop"}`);
+      toast.success(`${t("recommended_toast", "Recommended: ")} ${translateCrop(data.predicted_crop, lang)}`);
       const currentHistory = JSON.parse(localStorage.getItem("advisory_history") || "[]");
       const updated = [{ time: Date.now(), result: data }, ...currentHistory].slice(0, 10);
       localStorage.setItem("advisory_history", JSON.stringify(updated));
@@ -123,7 +124,7 @@ export default function CropAdvisory() {
   };
 
   const resetExpert = () => {
-    setForm(Object.fromEntries(FIELDS.map(f => [f.key, ""])));
+    setForm({ ...Object.fromEntries(FIELDS.map(f => [f.key, ""])), season: "Kharif" });
     setErrors({});
     setResult(null);
   };
@@ -179,8 +180,8 @@ export default function CropAdvisory() {
         P: parseFloat(seasonalData.avg_p || "40"),
         K: parseFloat(seasonalData.avg_k || "35"),
         ph: parseFloat(seasonalData.avg_ph || "6.5"),
-        temperature: parseFloat(locationInfo.temperature || "26"), // Fallback to live or default
-        rainfall: parseFloat(locationInfo.rainfall || "100"),
+        temperature: parseFloat(seasonalData.avg_temp || locationInfo.temperature || "26"),
+        rainfall: parseFloat(seasonalData.avg_rainfall || locationInfo.rainfall || "100"),
         state: beginnerForm.state,
         district: beginnerForm.district,
         season: beginnerForm.season,
@@ -216,8 +217,12 @@ export default function CropAdvisory() {
   };
 
   const currentDistricts = useMemo(() => {
+    // Beginner mode priority: Use districts from CSV if available, else static list
+    if (mode === "beginner" && seasonalMeta.districtsByState[beginnerForm.state]) {
+      return seasonalMeta.districtsByState[beginnerForm.state];
+    }
     return INDIAN_STATES_DISTRICTS[beginnerForm.state] || [];
-  }, [beginnerForm.state]);
+  }, [beginnerForm.state, mode, seasonalMeta.districtsByState]);
 
   const switchToExpert = () => { setMode("expert"); setResult(null); };
   const switchToBeginner = () => { setMode("beginner"); setResult(null); };
@@ -276,12 +281,12 @@ export default function CropAdvisory() {
       if (data && data.avg_n) {
         setForm((prev) => ({ ...prev, N: data.avg_n || prev.N, P: data.avg_p || prev.P, K: data.avg_k || prev.K, ph: data.avg_ph || prev.ph }));
         setResult({ note: t("filled_from_averages", "Filled using averages") });
-        toast.success(`District averages applied for ${district}`);
+        toast.success(t("averages_applied", "District averages applied"));
       } else {
-        toast.error("No historical soil data found.");
+        toast.error(t("no_soil_data", "No historical soil data found."));
       }
     } catch (err) {
-      toast.error("Failed to fetch averages.");
+      toast.error(t("fetch_averages_failed", "Failed to fetch averages."));
     } finally {
       setLoading(false);
     }
@@ -346,19 +351,43 @@ export default function CropAdvisory() {
           {/* Forms */}
           {mode === "expert" ? (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {FIELDS.map(f => (
-                  <Field
-                    key={f.key}
-                    label={t(f.key.toLowerCase(), f.label)}
-                    name={f.key}
-                    value={form[f.key]}
-                    onChange={onChangeExpert}
-                    error={errors[f.key]}
-                    placeholder={t(`${f.key.toLowerCase()}_placeholder`, f.placeholder)}
-                    icon={f.icon}
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {FIELDS.map((f) => (
+                  <div key={f.key} className="space-y-1.5">
+                    <label className="text-sm font-bold text-gray-700 ml-1">{t(f.labelKey || f.key.toLowerCase(), f.label)}</label>
+                    <input
+                      type="text"
+                      name={f.key}
+                      value={form[f.key]}
+                      onChange={onChangeExpert}
+                      placeholder={f.key === "ph" ? "6.5" : "50"}
+                      className={`w-full rounded-2xl border-2 p-4 outline-none transition-all ${errors[f.key] ? "border-red-300 bg-red-50" : "border-gray-100 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:shadow-md"}`}
+                    />
+                    {errors[f.key] && <p className="text-xs text-red-500 font-bold mt-1 ml-1">{errors[f.key]}</p>}
+                  </div>
                 ))}
+
+                {/* Expert Season Selector */}
+                <div className="space-y-1.5 md:col-span-2">
+                  <label className="text-sm font-bold text-gray-700 ml-1">{t("label_season", "Season")}</label>
+                  <select
+                    name="season"
+                    value={form.season}
+                    onChange={onChangeExpert}
+                    className="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 p-4 outline-none focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all font-medium"
+                  >
+                    {seasonalMeta.seasons.map((s) => (
+                      <option key={s} value={s}>{t(`season_${s.toLowerCase()}`, s)}</option>
+                    ))}
+                    {seasonalMeta.seasons.length === 0 && (
+                      <>
+                        <option value="Kharif">{t("season_kharif", "Monsoon (Kharif)")}</option>
+                        <option value="Rabi">{t("season_rabi", "Winter (Rabi)")}</option>
+                        <option value="Summer">{t("season_summer", "Summer")}</option>
+                      </>
+                    )}
+                  </select>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
                 <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-lg shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:hover:scale-100" onClick={submitExpert} disabled={loading}>
@@ -421,73 +450,118 @@ export default function CropAdvisory() {
 
         {/* Results Section */}
         {
-          result && !result.error && (result.recommended_crop || result.predicted_crop || result.recommended_crops) && (
-            <div className="animate-fade-in-up">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          result && !result.error && (result.predicted_crop || result.recommended_crop || result.recommended_crops) && (
+            <div className="animate-fade-in-up space-y-8">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                 <span className="bg-emerald-100 text-emerald-600 p-2 rounded-lg">📊</span> {t("results_title", "Results")}
               </h2>
-              <div className="grid gap-6 md:grid-cols-3">
-                {/* Card 1: Recommended Crop - HERO */}
-                <div className="md:col-span-3 rounded-3xl p-10 text-center shadow-lg relative overflow-hidden bg-gradient-to-br from-emerald-500 to-green-600 text-white">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400 opacity-20 rounded-full blur-3xl -ml-16 -mb-16"></div>
 
-                  <p className="relative z-10 text-sm font-bold uppercase tracking-[0.2em] text-emerald-100">{t("results_recommended_crop", "Recommended Crop")}</p>
-                  <p className="relative z-10 text-6xl md:text-8xl font-black mt-4 mb-6 drop-shadow-md">
-                    {translateCrop(result.recommended_crop || result.predicted_crop, lang) || "—"}
-                  </p>
+              <div className="grid gap-6 lg:grid-cols-3">
+                {/* AI Prediction HERO Card */}
+                <div className="lg:col-span-2 rounded-3xl p-8 shadow-xl relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-700 text-white">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl -ml-8 -mb-8" />
 
-                  {result.confidence && (
-                    <div className="relative z-10 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-6 py-2 border border-white/20">
-                      <span className="text-2xl font-bold">{result.confidence}%</span>
-                      <span className="text-xs font-bold uppercase opacity-80">{t("results_confidence", "Confidence")}</span>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-bold uppercase tracking-widest text-emerald-100 bg-white/10 px-3 py-1 rounded-full border border-white/10">🤖 {t("results_ai_prediction", "AI Smart Prediction")}</span>
                     </div>
-                  )}
-                </div>
 
-                {/* Card 2: Top-3 Options */}
-                {result.top_3 && result.top_3.length > 0 && (
-                  <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">🔄</div>
-                      <p className="font-bold text-gray-800">{t("results_alternatives", "Alternatives")}</p>
-                    </div>
-                    <div className="space-y-4">
-                      {result.top_3.map((item, idx) => (
-                        <div key={idx}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-gray-700">{idx + 1}. {translateCrop(item.crop, lang)}</span>
-                            <span className="font-bold text-blue-600 text-sm">{item.confidence}%</span>
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mt-4">
+                      <div>
+                        <p className="text-sm font-bold text-emerald-100/80 uppercase mb-1">{t("results_recommended_crop", "Recommended Crop")}</p>
+                        <h3 className="text-5xl md:text-7xl font-black drop-shadow-md tracking-tight">
+                          {translateCrop(result.predicted_crop || result.recommended_crop, lang) || "—"}
+                        </h3>
+                      </div>
+
+                      {result.confidence && (
+                        <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                          <div className="text-right">
+                            <p className="text-[10px] font-bold uppercase opacity-60 leading-none mb-1">{t("results_confidence", "Confidence")}</p>
+                            <p className="text-3xl font-black">{result.confidence}%</p>
                           </div>
-                          <div className="w-full rounded-full h-2 bg-gray-100 overflow-hidden">
-                            <div className="bg-blue-500 h-full rounded-full" style={{ width: `${item.confidence}%` }}></div>
+                          <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-white flex items-center justify-center font-bold text-xs">
+                            {result.confidence}%
                           </div>
                         </div>
-                      ))}
+                      )}
                     </div>
+
+                    {result.note && (
+                      <div className="mt-6 flex items-start gap-2 text-xs font-medium text-emerald-50 bg-black/10 p-3 rounded-xl border border-white/5">
+                        <span>💡</span>
+                        <span>{result.note}</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Traditional Advice / Alternatives Card */}
+                <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-lg flex flex-col h-full">
+                  {mode === "beginner" && result.static_suggestion ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">📜</div>
+                        <p className="font-bold text-gray-800">{t("results_trad_advice", "Traditional Local Advice")}</p>
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        {Array.isArray(result.static_suggestion)
+                          ? result.static_suggestion.map(c => (
+                            <div key={c} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-transparent hover:border-emerald-200 transition-all font-medium text-gray-700">
+                              <span className="text-xl">🌱</span> {translateCrop(c, lang)}
+                            </div>
+                          ))
+                          : <p className="text-sm text-gray-500">{result.static_suggestion}</p>
+                        }
+                      </div>
+                    </>
+                  ) : result.top_3 ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">🔄</div>
+                        <p className="font-bold text-gray-800">{t("results_alternatives", "Alternatives")}</p>
+                      </div>
+                      <div className="flex-1 space-y-5">
+                        {result.top_3.map((item, idx) => (
+                          <div key={idx}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-semibold text-gray-700">{idx + 1}. {translateCrop(item.crop, lang)}</span>
+                              <span className="font-bold text-blue-600 text-xs">{item.confidence}%</span>
+                            </div>
+                            <div className="w-full rounded-full h-2 bg-gray-100 overflow-hidden">
+                              <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${item.confidence}%` }}></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+                </div>
 
                 {/* Card 3: Fertilizer Status */}
                 {result.fertilizer && result.fertilizer.nutrients && (
-                  <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-md md:col-span-2">
-                    <div className="flex items-center gap-2 mb-4">
+                  <div className="rounded-3xl border border-emerald-100 bg-white p-7 shadow-lg md:col-span-3">
+                    <div className="flex items-center gap-2 mb-6">
                       <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">🧪</div>
-                      <p className="font-bold text-gray-800">{t("results_soil_analysis", "Soil Analysis")}</p>
+                      <p className="font-bold text-gray-800">{t("results_soil_analysis", "Soil Analysis & Nutrients")}</p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                       {["N", "P", "K"].map(key => {
                         const n = result.fertilizer.nutrients[key];
                         if (!n) return null;
                         const statusColor = n.status === "optimal" ? "bg-green-100 text-green-700" : n.status === "low" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700";
                         return (
-                          <div key={key} className="rounded-xl border border-gray-100 p-4 bg-gray-50/50">
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-2xl font-bold text-gray-400">{key}</span>
-                              <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${statusColor}`}>{n.status}</span>
+                          <div key={key} className="rounded-2xl border border-gray-100 p-5 bg-gray-50/70 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start mb-3">
+                              <span className="text-3xl font-black text-gray-300">{key}</span>
+                              <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-full ${statusColor}`}>{t(`status_${n.status}`, n.status)}</span>
                             </div>
-                            <div className="text-sm font-semibold text-gray-700">{n.value} kg/ha</div>
-                            <div className="text-xs text-gray-400 mt-1">Ideal: {n.ideal_range[0]}-{n.ideal_range[1]}</div>
+                            <div className="text-sm font-bold text-gray-800">{n.value} {t("unit_kg_ha", "kg/ha")}</div>
+                            <div className="w-full h-1 bg-gray-200 mt-2 rounded-full overflow-hidden">
+                              <div className={`h-full ${n.status === 'optimal' ? 'bg-green-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, (n.value / n.ideal_range[1]) * 100)}%` }}></div>
+                            </div>
+                            <div className="text-[10px] text-gray-500 mt-2 font-medium">{t("ideal_range", "Ideal")}: {n.ideal_range[0]}-{n.ideal_range[1]}</div>
                           </div>
                         )
                       })}
@@ -496,17 +570,17 @@ export default function CropAdvisory() {
                 )}
               </div>
 
-              {/* Actions */}
+              {/* Action Plan */}
               {result.fertilizer?.recommendations && (
-                <div className="mt-6 rounded-3xl bg-amber-50 border border-amber-100 p-8">
-                  <h3 className="text-lg font-bold text-amber-900 mb-4 flex items-center gap-2">
-                    <span>📋</span> {t("results_action_plan", "Recommended Action Plan")}
+                <div className="rounded-3xl bg-amber-50 border border-amber-100 p-8 shadow-sm">
+                  <h3 className="text-xl font-bold text-amber-900 mb-6 flex items-center gap-2">
+                    <span className="bg-amber-100 p-2 rounded-lg text-amber-600">📋</span> {t("results_action_plan", "Recommended Action Plan")}
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     {result.fertilizer.recommendations.map((rec, i) => (
-                      <div key={i} className="flex gap-3 bg-white/60 p-4 rounded-xl border border-amber-100/50">
-                        <div className="mt-1 h-2 w-2 rounded-full bg-amber-500 shrink-0" />
-                        <p className="text-sm text-gray-800 leading-relaxed font-medium">{rec}</p>
+                      <div key={i} className="flex gap-4 bg-white/80 p-5 rounded-2xl border border-amber-200/50 shadow-sm hover:translate-x-1 transition-transform">
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                        <p className="text-sm text-gray-800 leading-relaxed font-semibold">{rec}</p>
                       </div>
                     ))}
                   </div>
@@ -516,20 +590,42 @@ export default function CropAdvisory() {
           )
         }
 
-        {/* Beginner Results */}
+        {/* 🆕 Post-Prediction Guidance — What to do next */}
         {
-          result && !result.error && result.recommended_crops && (
-            <div className="animate-fade-in-up rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-800 mb-6">
-                {t("results_suggested_for", "Suggested Crops for")} <span className="text-emerald-600">{beginnerForm.district}</span>
+          result && !result.error && (result.recommended_crop || result.predicted_crop || result.recommended_crops) && (
+            <div className="animate-fade-in-up rounded-3xl border border-blue-100 bg-blue-50 p-8 shadow-md">
+              <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <span>🚀</span> {t("what_next", "What should I do next?")}
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {result.recommended_crops.map(c => (
-                  <div key={c} className="flex flex-col items-center justify-center p-6 rounded-2xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors cursor-default">
-                    <span className="text-3xl mb-2">🌱</span>
-                    <span className="font-bold text-center">{translateCrop(c, lang)}</span>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <a href="/advisory-chat" className="flex gap-3 items-start bg-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition group">
+                  <span className="text-2xl">💬</span>
+                  <div>
+                    <p className="font-bold text-gray-800 group-hover:text-blue-600 transition">{t("next_ask_ai", "Ask AI for farming tips")}</p>
+                    <p className="text-sm text-gray-500">{t("next_ask_ai_desc", "Get personalized advice on how to grow this crop")}</p>
                   </div>
-                ))}
+                </a>
+                <a href="/schemes" className="flex gap-3 items-start bg-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition group">
+                  <span className="text-2xl">🏛️</span>
+                  <div>
+                    <p className="font-bold text-gray-800 group-hover:text-blue-600 transition">{t("next_check_schemes", "Check government schemes")}</p>
+                    <p className="text-sm text-gray-500">{t("next_check_schemes_desc", "Find subsidies and loans for this crop")}</p>
+                  </div>
+                </a>
+                <a href="/voice" className="flex gap-3 items-start bg-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition group">
+                  <span className="text-2xl">🎤</span>
+                  <div>
+                    <p className="font-bold text-gray-800 group-hover:text-blue-600 transition">{t("next_voice", "Use Voice Assistant")}</p>
+                    <p className="text-sm text-gray-500">{t("next_voice_desc", "Ask questions by speaking in your language")}</p>
+                  </div>
+                </a>
+                <a href="/awareness" className="flex gap-3 items-start bg-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition group">
+                  <span className="text-2xl">📰</span>
+                  <div>
+                    <p className="font-bold text-gray-800 group-hover:text-blue-600 transition">{t("next_awareness", "Create awareness poster")}</p>
+                    <p className="text-sm text-gray-500">{t("next_awareness_desc", "Share farming knowledge with your community")}</p>
+                  </div>
+                </a>
               </div>
             </div>
           )

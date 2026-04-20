@@ -96,12 +96,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center font-sans">
-      {/* Background */}
+    <div className="min-h-screen relative flex items-center justify-center font-sans" style={{ backgroundColor: '#064e3b' }}>
+      {/* Background — CSS gradient fallback if image fails to load */}
       <img
-        src="https://images.unsplash.com/photo-1625246333195-58197bd47d26?q=80&w=2600&auto=format&fit=crop"
-        alt="Background"
+        src="/assets/login-bg.png"
+        alt=""
         className="absolute inset-0 h-full w-full object-cover"
+        onError={(e) => { e.target.style.display = 'none'; }}
+        loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-br from-green-900/90 to-emerald-900/90" />
 

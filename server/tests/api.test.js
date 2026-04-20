@@ -8,7 +8,7 @@ import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 // Mock environment variables
 process.env.MONGO_URI = 'mongodb://localhost:27017/agroaware_test';
 process.env.JWT_SECRET = 'test_secret_key_12345';
-process.env.ML_SERVICE_URL = 'http://localhost:8800';
+process.env.ML_SERVICE_URL = 'http://localhost:8000';
 
 // We'll use supertest for HTTP testing
 import request from 'supertest';

@@ -37,7 +37,14 @@ secrets.*
 
 # Logs
 *.log
+*.txt
+server_log.txt
 nohup.out
+
+# Personal/Miscellaneous
+*.docx
+*.pdf
+!ml_service/uploads/*.pdf # Keep sample uploads if needed, or keep ignored
 
 # OS
 .DS_Store

@@ -4,13 +4,13 @@ import { useTranslation } from "../i18n";
 import { useTheme } from "./ThemeProvider";
 
 const SECTIONS = [
-  { id: "about", label: "About" },
-  { id: "features", label: "Features" },
-  { id: "how", label: "How" },
-  { id: "gallery", label: "Gallery" },
-  { id: "videos", label: "Videos" },
-  { id: "faqs", label: "FAQs" },
-  { id: "contact", label: "Contact" },
+  { id: "about", labelKey: "nav_about", label: "About" },
+  { id: "features", labelKey: "nav_features", label: "Features" },
+  { id: "how", labelKey: "nav_how", label: "How" },
+  { id: "gallery", labelKey: "nav_gallery", label: "Gallery" },
+  { id: "videos", labelKey: "nav_videos", label: "Videos" },
+  { id: "faqs", labelKey: "nav_faqs", label: "FAQs" },
+  { id: "contact", labelKey: "nav_contact", label: "Contact" },
 ];
 
 // ... (previous imports)

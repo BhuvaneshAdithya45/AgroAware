@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from "../i18n";
 import { useTheme } from "../components/ThemeProvider";
 import Navbar from "../components/Navbar";
+import { authFetch } from "../lib/auth";
 
 export default function Voice() {
   const { t, lang } = useTranslation();
@@ -90,7 +91,7 @@ export default function Voice() {
     try {
       // Use the existing chat API which handles RAG + Schemes + Translation
       // We send 'language' param so backend replies in that language
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/advisory/chat`, {
+      const res = await authFetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/advisory/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: query, language: lang }),
@@ -130,11 +131,11 @@ export default function Voice() {
 
   if (!isSupported) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <div className="rounded-2xl shadow-xl p-8 max-w-md text-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           <div className="text-6xl mb-4">🎤</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("voice_browser_unsupported", "Browser Not Supported")}</h2>
-          <p className="text-gray-600">
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{t("voice_browser_unsupported", "Browser Not Supported")}</h2>
+          <p style={{ color: 'var(--text-muted)' }}>
             {t("voice_browser_msg", "Voice features require Chrome, Edge, or Safari. Please switch to a supported browser.")}
           </p>
         </div>
@@ -143,16 +144,16 @@ export default function Voice() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-green-800 mb-2">🎤 {t("voice_title", "Voice Assistant")}</h1>
-          <p className="text-gray-600">{t("voice_subtitle", "Ask me anything about farming, crops, or agriculture!")}</p>
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-primary)' }}>🎤 {t("voice_title", "Voice Assistant")}</h1>
+          <p style={{ color: 'var(--text-muted)' }}>{t("voice_subtitle", "Ask me anything about farming, crops, or agriculture!")}</p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-6">
+        <div className="rounded-3xl shadow-2xl p-8 mb-6" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
           {/* Microphone Button */}
           <div className="flex justify-center mb-8">
             <button
@@ -172,61 +173,61 @@ export default function Voice() {
             </button>
           </div>
 
-          <p className="text-center text-gray-500 mb-6">
+          <p className="text-center mb-6" style={{ color: 'var(--text-muted)' }}>
             {isListening ? t("voice_listening", "Listening... Speak now!") : isLoading ? t("voice_processing", "Processing...") : t("voice_tap_to_start", "Tap the microphone to start")}
           </p>
 
           {/* Transcript */}
           {transcript && (
-            <div className="bg-gray-50 rounded-xl p-4 mb-4">
-              <p className="text-sm text-gray-500 mb-1">{t("voice_you_said", "You said:")}</p>
-              <p className="text-lg text-gray-800 font-medium">"{transcript}"</p>
+            <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>{t("voice_you_said", "You said:")}</p>
+              <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>"{transcript}"</p>
             </div>
           )}
 
           {/* Response */}
           {response && (
-            <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+            <div className="rounded-xl p-4" style={{ backgroundColor: dark ? 'rgba(34,197,94,0.1)' : '#f0fdf4', border: '1px solid var(--border-color)' }}>
               <div className="flex justify-between items-start mb-2">
-                <p className="text-sm text-green-600">{t("voice_response", "Response:")}</p>
+                <p className="text-sm" style={{ color: 'var(--color-primary)' }}>{t("voice_response", "Response:")}</p>
                 <button
                   onClick={isSpeaking ? stopSpeaking : () => speak(response)}
                   className="text-2xl hover:scale-110 transition-transform"
-                  title={isSpeaking ? 'Stop speaking' : 'Read aloud'}
+                  title={isSpeaking ? t("voice_stop", "Stop speaking") : t("voice_read", "Read aloud")}
                 >
                   {isSpeaking ? '🔇' : '🔊'}
                 </button>
               </div>
-              <p className="text-gray-800 leading-relaxed">{response}</p>
+              <p className="leading-relaxed" style={{ color: 'var(--text-primary)' }}>{response}</p>
             </div>
           )}
 
           {/* Error */}
           {error && (
-            <div className="bg-red-50 rounded-xl p-4 border border-red-200 mt-4">
-              <p className="text-red-600">{error}</p>
+            <div className="rounded-xl p-4 mt-4" style={{ backgroundColor: dark ? 'rgba(239,68,68,0.1)' : '#fef2f2', border: '1px solid #fca5a5' }}>
+              <p style={{ color: '#ef4444' }}>{error}</p>
             </div>
           )}
         </div>
 
         {/* Tips */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-3">💡 {t("voice_try_asking", "Try asking:")}</h3>
-          <ul className="space-y-2 text-gray-600">
+        <div className="backdrop-blur rounded-2xl p-6" style={{ backgroundColor: dark ? 'var(--bg-card)' : 'rgba(255,255,255,0.8)', border: '1px solid var(--border-color)' }}>
+          <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>💡 {t("voice_try_asking", "Try asking:")}</h3>
+          <ul className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">•</span>
+              <span style={{ color: 'var(--color-primary)' }}>•</span>
               "{t("voice_q1", "What crops should I grow in Karnataka during summer?")}"
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">•</span>
+              <span style={{ color: 'var(--color-primary)' }}>•</span>
               "{t("voice_q2", "How much fertilizer does rice need?")}"
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">•</span>
+              <span style={{ color: 'var(--color-primary)' }}>•</span>
               "{t("voice_q3", "What is the best time to plant wheat?")}"
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-green-500">•</span>
+              <span style={{ color: 'var(--color-primary)' }}>•</span>
               "{t("voice_q4", "Tell me about government schemes for farmers")}"
             </li>
           </ul>

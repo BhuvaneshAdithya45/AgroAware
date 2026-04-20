@@ -11,6 +11,7 @@ import Voice from "./pages/Voice";
 import RagUpload from "./pages/RagUpload";
 import AdvisoryChat from "./components/AdvisoryChat";
 import FloatingChat from "./components/FloatingChat";
+import OfflineBanner from "./components/OfflineBanner";
 
 export default function App() {
   return (
@@ -88,6 +89,9 @@ export default function App() {
 
       {/* Floating Chat Button - appears on all pages */}
       <FloatingChat />
+
+      {/* Offline indicator - appears when no internet */}
+      <OfflineBanner />
     </>
   );
 }

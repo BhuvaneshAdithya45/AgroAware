@@ -36,76 +36,40 @@ export default function FloatingChat() {
 
             {/* Chat Popup */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 w-80 rounded-2xl shadow-2xl border overflow-hidden animate-fadeIn"
+                <div className="fixed bottom-24 right-6 z-50 w-80 h-[450px] rounded-2xl shadow-2xl border overflow-hidden flex flex-col animate-fadeIn"
                     style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-color)" }}>
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4">
-                        <h3 className="font-bold text-lg">🌾 {t("brand", "AgroAware")} {t("assistant", "Assistant")}</h3>
-                        <p className="text-sm text-green-100">{t("how_can_we_help", "How can we help you today?")}</p>
+                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h3 className="font-bold text-lg">🌾 {t("brand", "AgroAware")}</h3>
+                            <p className="text-xs text-green-100">{t("ai_assistant_online", "AI Assistant Online")}</p>
+                        </div>
+                        <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">✕</button>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className="p-4 space-y-3">
-                        <button
-                            onClick={() => {
-                                navigate('/advisory-chat');
-                                setIsOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 transition text-left"
-                        >
-                            <span className="text-2xl">💬</span>
-                            <div>
-                                <div className="font-semibold" style={{ color: "var(--text-primary)" }}>{t("chat_with_ai", "Chat with AI")}</div>
-                                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("ask_farming_questions", "Ask farming questions")}</div>
-                            </div>
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                navigate('/voice');
-                                setIsOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition text-left"
-                        >
-                            <span className="text-2xl">🎤</span>
-                            <div>
-                                <div className="font-semibold" style={{ color: "var(--text-primary)" }}>{t("voice_assistant", "Voice Assistant")}</div>
-                                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("speak_your_questions", "Speak your questions")}</div>
-                            </div>
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                navigate('/schemes');
-                                setIsOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition text-left"
-                        >
-                            <span className="text-2xl">🏛️</span>
-                            <div>
-                                <div className="font-semibold" style={{ color: "var(--text-primary)" }}>{t("govt_schemes", "Govt Schemes")}</div>
-                                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("find_subsidies_loans", "Find subsidies & loans")}</div>
-                            </div>
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                navigate('/awareness');
-                                setIsOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-purple-50 hover:bg-purple-100 transition text-left"
-                        >
-                            <span className="text-2xl">📚</span>
-                            <div>
-                                <div className="font-semibold" style={{ color: "var(--text-primary)" }}>{t("farming_tips", "Farming Tips")}</div>
-                                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{t("best_practices_faqs", "Best practices & FAQs")}</div>
-                            </div>
-                        </button>
+                    {/* Chat Content - Functional Mini Interface */}
+                    <div className="flex-1 overflow-hidden">
+                        <iframe
+                            src="/advisory-chat?embedded=true"
+                            className="w-full h-full border-none"
+                            title="AgroAware AI Chat"
+                        />
                     </div>
 
-                    {/* Footer */}
-                    <div className="p-3 text-center text-xs" style={{ backgroundColor: "var(--bg-secondary)", color: "var(--text-muted)" }}>
-                        {t("available_5_languages", "Available in 5 languages")} • {t("support_24_7", "24/7 Support")}
+                    {/* Footer Nav */}
+                    <div className="p-2 grid grid-cols-3 gap-1 bg-gray-50 border-t" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}>
+                        <button onClick={() => { navigate('/voice'); setIsOpen(false); }} className="flex flex-col items-center p-1 rounded hover:bg-white transition">
+                            <span className="text-lg">🎤</span>
+                            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{t("voice", "Voice")}</span>
+                        </button>
+                        <button onClick={() => { navigate('/schemes'); setIsOpen(false); }} className="flex flex-col items-center p-1 rounded hover:bg-white transition">
+                            <span className="text-lg">🏛️</span>
+                            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{t("schemes", "Schemes")}</span>
+                        </button>
+                        <button onClick={() => { navigate('/awareness'); setIsOpen(false); }} className="flex flex-col items-center p-1 rounded hover:bg-white transition">
+                            <span className="text-lg">📚</span>
+                            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{t("tips", "Tips")}</span>
+                        </button>
                     </div>
                 </div>
             )}

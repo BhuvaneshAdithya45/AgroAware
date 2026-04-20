@@ -30,10 +30,16 @@ def get_fertilizer_recommendation(crop, N, P, K):
 
     if statusN == "low":
         result["recommendations"].append("Apply Urea (46% N): 40–60 kg/acre")
+    elif statusN == "high":
+        result["recommendations"].append("⚠️ Nitrogen is too high — reduce N fertilizer. Excess N causes leaf burn and groundwater contamination.")
     if statusP == "low":
         result["recommendations"].append("Apply DAP (18-46-0): 20–40 kg/acre")
+    elif statusP == "high":
+        result["recommendations"].append("⚠️ Phosphorus is too high — skip P fertilizer this cycle. Excess P causes soil toxicity and water pollution.")
     if statusK == "low":
         result["recommendations"].append("Apply Muriate of Potash (MOP, 60% K2O): 20–35 kg/acre")
+    elif statusK == "high":
+        result["recommendations"].append("⚠️ Potassium is too high — reduce K application. Excess K can block calcium and magnesium uptake.")
 
     if not result["recommendations"]:
         result["recommendations"].append("Soil nutrients appear balanced — no major fertilizer adjustment needed.")

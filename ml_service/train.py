@@ -31,7 +31,7 @@ TRAIN_CSV = DATA_DIR / "Train Dataset.csv"
 TEST_CSV  = DATA_DIR / "Test Dataset.csv"
 TUNED_JSON = MODELS_DIR / "tuned_params.json"
 
-FEATURES = ["N", "P", "K", "ph", "temperature", "rainfall"]
+FEATURES = ["N", "P", "K", "ph", "temperature", "rainfall", "season"]
 LABEL_CANDIDATES = ["label", "Label", "crop", "Crop", "target", "Target"]
 
 
@@ -171,8 +171,16 @@ def evaluate(models, X_train, y_train, X_test, y_test, encoder):
 
 
 def build_ensemble(results):
-    estimators = [(name.lower(), results[name]["model"]) for name in results]
-    weights = [results[name]["f1"] for name in results]   # weighted soft voting
+    # Only include models with F1 >= 0.90 to avoid weak learners dragging down ensemble
+    MIN_F1 = 0.90
+    estimators = []
+    weights = []
+    for name in results:
+        if results[name]["f1"] >= MIN_F1:
+            estimators.append((name.lower(), results[name]["model"]))
+            weights.append(results[name]["f1"])
+        else:
+            print(f"   ⚠️ Excluding {name} from ensemble (F1={results[name]['f1']:.4f} < {MIN_F1})")
     return VotingClassifier(estimators=estimators, voting="soft", weights=weights)
 
 
@@ -474,10 +482,34 @@ def main():
 
     # ✅ Data leak check — detect and remove overlapping rows
     print("\n🔍 Checking for train/test data leaks...")
-    test_df = check_data_leak(train_df, test_df, FEATURES)
+    test_df_clean = check_data_leak(train_df, test_df, FEATURES)
 
-    X_train = train_df[FEATURES].astype(float).values
-    X_test  = test_df[FEATURES].astype(float).values
+    if len(test_df_clean) == 0:
+        print("💡 Test set is empty after leak detection (likely identical datasets). Splitting training data 80/20...")
+        from sklearn.model_selection import train_test_split
+        train_df, test_df = train_test_split(train_df, test_size=0.2, random_state=42, stratify=train_df[label])
+    else:
+        test_df = test_df_clean
+
+    X_train_raw = train_df[FEATURES]
+    X_test_raw  = test_df[FEATURES]
+
+    # One-Hot Encode 'season' column
+    print("🎭 One-Hot Encoding 'season'...")
+    X_train_encoded = pd.get_dummies(X_train_raw, columns=['season'])
+    X_test_encoded  = pd.get_dummies(X_test_raw, columns=['season'])
+
+    # Ensure same columns in both
+    missing_cols = set(X_train_encoded.columns) - set(X_test_encoded.columns)
+    for c in missing_cols:
+        X_test_encoded[c] = 0
+    X_test_encoded = X_test_encoded[X_train_encoded.columns]
+
+    # Update FEATURES list to reflect encoded columns for later use
+    ENCODED_FEATURES = list(X_train_encoded.columns)
+
+    X_train = X_train_encoded.astype(float).values
+    X_test  = X_test_encoded.astype(float).values
     y_train_raw = train_df[label].astype(str).values
     y_test_raw  = test_df[label].astype(str).values
 
@@ -572,12 +604,16 @@ def main():
             "f1": round(ensemble_f1, 4),
             "weights": [round(w, 4) for w in ensemble.weights]
         },
-        "features": FEATURES,
+        "features": ENCODED_FEATURES,
         "label_classes": list(encoder.classes_)
     }
     
     with open(MODELS_DIR / "training_report.json", "w") as f:
         json.dump(training_report, f, indent=2)
+
+    # Save feature names for API use
+    with open(MODELS_DIR / "features.json", "w") as f:
+        json.dump(ENCODED_FEATURES, f, indent=2)
 
     print("\n✅ DONE — Model Successfully Trained & Saved.\n")
     print(f"📁 Reports saved to: {REPORTS_DIR}/\n")

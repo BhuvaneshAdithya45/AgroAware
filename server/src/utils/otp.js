@@ -79,7 +79,11 @@ export async function sendOTP(phone) {
       attempts: 0,
     });
 
-    return { success: true, message: 'OTP sent successfully' };
+    return {
+      success: true,
+      message: 'OTP sent successfully',
+      otp: client ? null : otp // Return OTP only in test mode
+    };
   } catch (error) {
     console.error('❌ Error sending OTP:', error.message);
     return { success: false, message: 'Failed to send OTP. Please try again.' };

@@ -1,40 +1,40 @@
 {
   "base_models": {
     "DecisionTree": {
-      "accuracy": 0.955,
-      "precision": 0.9775,
-      "recall": 0.9775,
-      "f1": 0.9775
+      "accuracy": 0.9541,
+      "precision": 0.9751,
+      "recall": 0.9769,
+      "f1": 0.9757
     },
     "RandomForest": {
-      "accuracy": 0.955,
-      "precision": 0.9778,
-      "recall": 0.9756,
-      "f1": 0.9766
+      "accuracy": 0.9582,
+      "precision": 0.9782,
+      "recall": 0.9762,
+      "f1": 0.9769
     },
     "LogisticRegression": {
-      "accuracy": 0.9238,
-      "precision": 0.906,
-      "recall": 0.8733,
-      "f1": 0.8791
+      "accuracy": 0.9541,
+      "precision": 0.9423,
+      "recall": 0.9137,
+      "f1": 0.9221
     },
     "XGBoost": {
-      "accuracy": 0.9509,
-      "precision": 0.9771,
-      "recall": 0.9712,
-      "f1": 0.9735
+      "accuracy": 0.961,
+      "precision": 0.9819,
+      "recall": 0.9716,
+      "f1": 0.9746
     }
   },
   "ensemble": {
-    "accuracy": 0.954,
-    "precision": 0.9798,
-    "recall": 0.9709,
-    "f1": 0.9739,
+    "accuracy": 0.9607,
+    "precision": 0.9809,
+    "recall": 0.9717,
+    "f1": 0.9746,
     "weights": [
-      0.9775,
-      0.9766,
-      0.8791,
-      0.9735
+      0.9757,
+      0.9769,
+      0.9221,
+      0.9746
     ]
   },
   "features": [
@@ -43,7 +43,11 @@
     "K",
     "ph",
     "temperature",
-    "rainfall"
+    "rainfall",
+    "season_Kharif",
+    "season_Rabi",
+    "season_Summer",
+    "season_Whole Year"
   ],
   "label_classes": [
     "banana",

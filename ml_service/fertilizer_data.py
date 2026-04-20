@@ -68,3 +68,4 @@ CROP_NPK_REQUIREMENTS = {
     "blackpepper": {"N": (50,100),  "P": (20,50),  "K": (100,150)},
     "cardamom":    {"N": (60,100),  "P": (30,60),  "K": (80,120)},
 }
+

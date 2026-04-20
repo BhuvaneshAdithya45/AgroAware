@@ -59,6 +59,10 @@ router.post("/crop", async (req, res) => {
     const payload = {};
     for (const k of REQUIRED_FIELDS) payload[k] = Number(normalized[k]);
 
+    // Forward season (string field, not numeric — ML service defaults to "Kharif" if missing)
+    const season = body.season || body.Season || "Kharif";
+    payload.season = String(season).trim();
+
     // Debug log so you can inspect what Node will send to ML
     console.log("Calling ML service with payload:", payload);
 

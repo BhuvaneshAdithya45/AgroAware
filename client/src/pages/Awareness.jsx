@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/Navbar';
 import { useTranslation } from '../i18n';
+import { authFetch } from '../lib/auth';
 
 const awarenessTranslations = {
   en: {
@@ -340,7 +341,7 @@ const awarenessTranslations = {
 export default function Awareness() {
   const [openFaq, setOpenFaq] = useState(null);
   const [activeCategory, setActiveCategory] = useState(0);
-  const { lang } = useTranslation();
+  const { lang, t } = useTranslation();
   const [aiTopic, setAiTopic] = useState('');
   const [aiContent, setAiContent] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
@@ -367,18 +368,42 @@ export default function Awareness() {
     if (!posterRef.current) return;
     setDownloading(true);
     try {
-      const canvas = await html2canvas(posterRef.current, {
-        useCORS: true,
-        allowTaint: true,
+      // Clone the poster element so we don't touch the original (avoids blur)
+      const clone = posterRef.current.cloneNode(true);
+      clone.style.position = 'fixed';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.width = posterRef.current.offsetWidth + 'px';
+      document.body.appendChild(clone);
+
+      // Remove images from clone to avoid CORS taint issues
+      const imgs = clone.querySelectorAll('img');
+      imgs.forEach(img => {
+        // Replace image with a colored placeholder in the clone
+        const placeholder = document.createElement('div');
+        placeholder.style.width = '100%';
+        placeholder.style.height = '300px';
+        placeholder.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)';
+        placeholder.style.borderRadius = '16px';
+        img.parentNode.replaceChild(placeholder, img);
+      });
+      const canvas = await html2canvas(clone, {
         scale: 2,
         backgroundColor: '#ffffff',
+        useCORS: false,
+        allowTaint: false,
       });
+
+      // Clean up clone
+      document.body.removeChild(clone);
+
       const link = document.createElement('a');
       link.download = `agroaware-poster-${Date.now()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (err) {
       console.error('Download failed:', err);
+      alert('Download failed. Please try right-clicking the poster and selecting "Save as image".');
     } finally {
       setDownloading(false);
     }
@@ -398,7 +423,7 @@ export default function Awareness() {
     return () => clearInterval(interval);
   }, [posterLoading, t]);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const BACKEND_URL = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
   const langMap = { en: 'English', hi: 'Hindi', kn: 'Kannada', te: 'Telugu', ta: 'Tamil' };
 
   const aiTopics = [
@@ -424,7 +449,7 @@ export default function Awareness() {
     setAiContent('');
     setAiLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/advisory/chat`, {
+      const res = await authFetch(`${BACKEND_URL}/api/advisory/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -433,9 +458,9 @@ export default function Awareness() {
         }),
       });
       const data = await res.json();
-      setAiContent(data.answer || 'Unable to generate content. Please try again.');
+      setAiContent(data.answer || t("ai_error", "Unable to generate content. Please try again."));
     } catch {
-      setAiContent('⚠️ Service unavailable. Please check your connection and try again.');
+      setAiContent(t("ai_service_error", "⚠️ Service unavailable. Please check your connection and try again."));
     } finally {
       setAiLoading(false);
     }
@@ -447,16 +472,20 @@ export default function Awareness() {
     setPosterImageLoaded(false);
     setPosterLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/advisory/poster`, {
+      const res = await authFetch(`${BACKEND_URL}/api/advisory/poster`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, language: langMap[lang] || 'English' }),
       });
       const data = await res.json();
+      // Prepend backend URL if imageUrl is a relative path (proxy endpoint)
+      if (data.imageUrl && data.imageUrl.startsWith('/')) {
+        data.imageUrl = `${BACKEND_URL}${data.imageUrl}`;
+      }
       setPosterData(data);
       if (!data.error) savePosterToHistory(topic, data);
     } catch {
-      setPosterData({ error: 'Poster generation failed. Please try again.' });
+      setPosterData({ error: t("poster_error", "Poster generation failed. Please try again.") });
     } finally {
       setPosterLoading(false);
     }
@@ -502,6 +531,11 @@ export default function Awareness() {
             <p className="text-indigo-200 mb-8 max-w-xl text-lg">
               {t("ai_advisor_subtitle", "Ask our advanced AI about any farming topic in your local language.")}
             </p>
+            {aiContent && aiContent.includes('⚠️') && (
+              <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-3 rounded-xl text-sm font-medium animate-shake">
+                {aiContent}
+              </div>
+            )}
 
             {/* Custom Topic Input */}
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-2 md:p-3 border border-indigo-500/30 flex flex-col md:flex-row gap-3 shadow-xl mb-8">
@@ -600,6 +634,17 @@ export default function Awareness() {
               </button>
             </div>
 
+            {posterData && posterData.error && (
+              <div className="mt-8 bg-black/40 border border-red-500/50 text-red-100 p-6 rounded-3xl text-center animate-shake">
+                <p className="text-xl mb-4">⚠️ {posterData.error}</p>
+                <button
+                  onClick={() => generatePoster(posterTopic)}
+                  className="px-6 py-2 bg-white text-rose-600 font-bold rounded-xl hover:bg-rose-50 transition-all"
+                >
+                  🔄 Try Again
+                </button>
+              </div>
+            )}
             {/* Poster Result */}
             {posterData && !posterData.error && (
               <div ref={posterRef} className="bg-white rounded-3xl p-6 md:p-8 shadow-2xl text-gray-900 animate-scale-in">
@@ -613,8 +658,15 @@ export default function Awareness() {
                       src={posterData.imageUrl}
                       alt="Generated Poster"
                       className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      onLoad={() => setPosterImageLoaded(true)}
                       crossOrigin="anonymous"
+                      onLoad={() => setPosterImageLoaded(true)}
+                      onError={(e) => {
+                        // Replace broken image with a gradient placeholder
+                        e.target.style.display = 'none';
+                        e.target.parentElement.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)';
+                        e.target.parentElement.style.minHeight = '200px';
+                        setPosterImageLoaded(true);
+                      }}
                     />
                   </div>
 

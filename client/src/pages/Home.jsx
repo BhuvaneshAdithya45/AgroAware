@@ -194,7 +194,7 @@ export default function Home() {
                 {t("features_title", "Powerful Features")}
               </h2>
               <p className="mt-4 text-lg text-emerald-800 font-medium">
-                All the tools you need for modern, sustainable agriculture in one place.
+                {t("features_subtitle", "All the tools you need for modern, sustainable agriculture in one place.")}
               </p>
             </div>
 
@@ -286,7 +286,7 @@ export default function Home() {
 
                   {/* Hover visual arrow */}
                   <div className="mt-6 flex items-center text-sm font-bold text-emerald-600 opacity-0 transition-opacity group-hover:opacity-100">
-                    Try Feature <span className="ml-1">→</span>
+                    {t("try_feature", "Try Feature")} <span className="ml-1">→</span>
                   </div>
                 </div>
               ))}

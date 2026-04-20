@@ -5,6 +5,7 @@ set -euo pipefail
 # Usage: ./start.sh [--port PORT]
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT_DIR"
 VENV_DIR="$ROOT_DIR/.venv"
 PYBIN="${VENV_DIR}/bin/python"
 UVICORN_MODULE="uvicorn"

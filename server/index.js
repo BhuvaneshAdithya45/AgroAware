@@ -10,12 +10,12 @@ import authRoutes from "./src/routes/auth.js";
 import recommendRoutes from "./src/routes/recommend.js";
 import seasonalRoutes from "./src/routes/seasonal.js";
 import advisoryRoutes from "./src/routes/advisory.js";
+import feedbackRoutes from "./src/routes/feedback.js";
+import auth from "./src/middleware/auth.js";
 
 dotenv.config();
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 /* ---------------------- Basic Security & Logging ---------------------- */
 app.use(helmet()); // secure HTTP headers
@@ -101,27 +101,69 @@ app.use(express.urlencoded({ extended: true }));
 
 /* ---------------------- Routes ---------------------- */
 
-// Auth
+// Auth (public — no middleware)
 app.use("/api/auth", authRoutes);
 
-// 🔹 ML crop recommendation (numeric input → crop)
-app.use("/api/recommend", recommendRoutes);
+// 🔹 ML crop recommendation (protected)
+app.use("/api/recommend", auth, recommendRoutes);
 
-// 🔹 Seasonal crop info
-app.use("/api/advisory/seasonal", seasonalRoutes);
+// 🔹 Seasonal crop info (protected)
+app.use("/api/advisory/seasonal", auth, seasonalRoutes);
 
-// 🔹 Advisory chatbot + RAG + crop ML bridge
-app.use("/api/advisory", advisoryRoutes);
+// 🔹 Poster image proxy (public — no auth needed for <img> tags)
+app.get("/api/advisory/poster-image", async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: "Missing image id" });
+
+  // Override Helmet's CORP/CORS headers so <img> tags can load cross-origin
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.set('Access-Control-Allow-Origin', '*');
+
+  try {
+    const unsplashUrl = `https://images.unsplash.com/${id}?w=1024&h=768&fit=crop&q=80`;
+    const imgRes = await fetch(unsplashUrl);
+    if (!imgRes.ok) throw new Error(`Unsplash returned ${imgRes.status}`);
+    res.set('Content-Type', imgRes.headers.get('content-type') || 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=86400');
+    const buffer = await imgRes.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    console.error("Image proxy error:", err.message);
+    res.set('Content-Type', 'image/png');
+    res.send(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
+  }
+});
+
+// 🔹 Advisory chatbot + RAG + crop ML bridge (protected)
+app.use("/api/advisory", auth, advisoryRoutes);
+
+// 🔹 User feedback on AI answers (auth optional — for user tracking)
+app.use("/api/feedback", feedbackRoutes);
 
 
 // Health check route
-app.get("/", (req, res) =>
+app.get("/", async (req, res) => {
+  let mlStatus = "unknown";
+  try {
+    const mlRes = await fetch(`${process.env.ML_URL || "http://localhost:8000"}/health`);
+    if (mlRes.ok) mlStatus = "online";
+  } catch {
+    mlStatus = "offline";
+  }
+
+  const geminiConfigured = process.env.GEMINI_API_KEY &&
+    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here" &&
+    !process.env.GEMINI_API_KEY.includes("placeholder");
+
   res.json({
     status: "ok",
     service: "AgroAware API",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    ml_service: mlStatus,
+    ai_advisor: geminiConfigured ? "configured" : "missing_key",
     env: process.env.NODE_ENV || "development",
-  })
-);
+  });
+});
 
 /* ---------------------- Error Handling ---------------------- */
 // 404

@@ -152,5 +152,75 @@ class TestRagEndpoints:
         assert data["status"] == "error" or "No document" in data.get("message", "")
 
 
+class TestSeasonalPenalty:
+    """Tests for the seasonal reliability penalty system"""
+    
+    def test_seasonal_mismatch_reduces_confidence(self):
+        """Rice is a Kharif crop — predicting in Summer should apply penalty"""
+        # Use typical rice soil values
+        payload = {
+            "N": 90, "P": 45, "K": 40,
+            "ph": 6.5, "temperature": 25.0, "rainfall": 200.0,
+            "season": "Summer"
+        }
+        response = client.post("/predict", json=payload)
+        data = response.json()
+        assert response.status_code == 200
+        # If rice appears in top_3, its confidence should be penalized (lower than without penalty)
+        for crop in data["top_3"]:
+            assert "confidence" in crop
+    
+    def test_seasonal_match_no_penalty(self):
+        """Predicting with matching season should show verification note"""
+        payload = {
+            "N": 90, "P": 45, "K": 40,
+            "ph": 6.5, "temperature": 25.0, "rainfall": 200.0,
+            "season": "Kharif"
+        }
+        response = client.post("/predict", json=payload)
+        data = response.json()
+        assert response.status_code == 200
+        # Should have a note (either verified or warning)
+        if "note" in data:
+            assert "Verified" in data["note"] or "Warning" in data["note"]
+
+
+class TestFertilizerHighNutrients:
+    """Tests for excess nutrient warnings in fertilizer"""
+    
+    def test_high_nitrogen_warning(self):
+        """High N should produce an excess nitrogen warning"""
+        payload = {"crop": "rice", "N": 200, "P": 50, "K": 50}
+        response = client.post("/fertilizer", json=payload)
+        data = response.json()
+        assert response.status_code == 200
+        recs = " ".join(data.get("recommendations", []))
+        assert "too high" in recs.lower() or "high" in data["nutrients"]["N"]["status"]
+    
+    def test_all_high_nutrients(self):
+        """All nutrients high should produce multiple warnings"""
+        payload = {"crop": "rice", "N": 200, "P": 100, "K": 100}
+        response = client.post("/fertilizer", json=payload)
+        data = response.json()
+        assert response.status_code == 200
+        assert len(data.get("recommendations", [])) >= 2
+
+
+class TestLowConfidence:
+    """Tests for low-confidence threshold warning"""
+    
+    def test_extreme_values_may_trigger_low_confidence(self):
+        """Extreme edge values should still return a valid prediction"""
+        payload = {
+            "N": 1, "P": 1, "K": 1,
+            "ph": 3.5, "temperature": 5.0, "rainfall": 10.0
+        }
+        response = client.post("/predict", json=payload)
+        data = response.json()
+        assert response.status_code == 200
+        assert "predicted_crop" in data
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

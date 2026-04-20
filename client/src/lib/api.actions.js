@@ -30,7 +30,7 @@ export const getSeasonalList = () =>
 ====================================================== */
 
 // IMPORTANT: This endpoint goes **directly to ML service**, not Node backend
-const ML_SERVICE_URL = "http://localhost:8800";
+const ML_SERVICE_URL = import.meta.env.VITE_ML_URL || "http://localhost:8000";
 
 export const getFertilizerAdvice = async (payload) => {
   // payload = { crop, N, P, K }

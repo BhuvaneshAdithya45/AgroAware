@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getAllSchemes, getApplicableSchemes, searchSchemes } from "../lib/schemeFilter";
 import { useLanguage } from "../i18n";
 import SpeakerButton from "../components/SpeakerButton";
+import { authFetch } from "../lib/auth";
 
 const schemeTranslations = {
   en: {
@@ -170,7 +171,7 @@ export default function Schemes() {
         Apply: ${scheme.applyProcess}
       `;
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/advisory/translate`, {
+      const response = await authFetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/advisory/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: textToTranslate, targetLang: language }),
@@ -195,7 +196,7 @@ export default function Schemes() {
           applyProcess: scheme.applyProcess
         });
 
-        const responseJson = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/advisory/translate`, {
+        const responseJson = await authFetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/advisory/translate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

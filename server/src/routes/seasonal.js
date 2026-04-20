@@ -18,6 +18,8 @@ const CSV_PATH = path.resolve(__dirname, "../../ml_service/data/district_season_
 let cachedRows = null;
 let lastLoaded = 0;
 
+
+
 function loadCsvIntoMemory() {
   return new Promise((resolve, reject) => {
     if (cachedRows && cachedRows.length > 0) return resolve(cachedRows);
@@ -106,11 +108,12 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Seasonal dataset not found" });
     }
 
-    const match = rows.find((r) =>
-      (r.state || "").toLowerCase() === String(state).toLowerCase()
-      && (r.district || "").toLowerCase() === String(district).toLowerCase()
-      && (r.season || "").toLowerCase() === String(season).toLowerCase()
-    );
+    const match = rows.find((r) => {
+      const matchState = (r.state || "").toLowerCase() === String(state).toLowerCase().trim();
+      const matchDistrict = (r.district || "").toLowerCase() === String(district).toLowerCase().trim();
+      const matchSeason = (r.season || "").toLowerCase() === String(season).toLowerCase().trim();
+      return matchState && matchDistrict && matchSeason;
+    });
 
     if (!match) {
       return res.status(404).json({ error: `No data found for ${district}, ${season} in ${state}` });
@@ -131,7 +134,9 @@ router.post("/", async (req, res) => {
       avg_n: match.avg_n || null,
       avg_p: match.avg_p || null,
       avg_k: match.avg_k || null,
-      avg_ph: match.avg_ph || null
+      avg_ph: match.avg_ph || null,
+      avg_temp: match.avg_temp || null,
+      avg_rainfall: match.avg_rainfall || null
     });
   } catch (err) {
     console.error("seasonal POST error:", err);

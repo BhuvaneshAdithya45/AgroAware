@@ -1,8 +1,10 @@
 // client/src/components/SpeakerButton.jsx
 import { useState, useEffect } from 'react';
 import { speakText, stopSpeech, isSpeaking, isSpeechSupported, getAvailableVoices } from '../lib/tts';
+import { useTranslation } from '../i18n';
 
 export default function SpeakerButton({ text, language = 'en', size = 'md', showLabel = false }) {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSupported] = useState(isSpeechSupported());
 
@@ -22,7 +24,7 @@ export default function SpeakerButton({ text, language = 'en', size = 'md', show
       const success = speakText(text, language, () => {
         setIsPlaying(false);
       });
-      
+
       if (!success) {
         setIsPlaying(false);
       }
@@ -55,8 +57,8 @@ export default function SpeakerButton({ text, language = 'en', size = 'md', show
         transition-all duration-200 cursor-pointer
         active:scale-95 font-medium
       `}
-      title={isPlaying ? 'Stop' : 'Listen in ' + language.toUpperCase()}
-      aria-label={isPlaying ? 'Stop speaking' : 'Listen'}
+      title={isPlaying ? t('stop', 'Stop') : t('listen_in', 'Listen in ') + language.toUpperCase()}
+      aria-label={isPlaying ? t('stop_speaking', 'Stop speaking') : t('listen', 'Listen')}
     >
       {/* Icon with animation */}
       <span className={`inline-block ${iconSize[size]} ${isPlaying ? 'animate-pulse' : ''}`}>

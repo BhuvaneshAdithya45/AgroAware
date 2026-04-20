@@ -1,11 +1,13 @@
 import React from 'react';
 import { startListening, stopListening, isCurrentlyListening, isSpeechRecognitionSupported } from '../lib/stt';
+import { useTranslation } from '../i18n';
 
 /**
  * MicrophoneButton - Voice input for chat messages
  * Shows microphone icon with recording indicator
  */
 const MicrophoneButton = ({ language = 'en', onTranscript, disabled = false, size = 'md' }) => {
+  const { t } = useTranslation();
   const [isListening, setIsListening] = React.useState(false);
   const [error, setError] = React.useState(null);
 
@@ -17,7 +19,7 @@ const MicrophoneButton = ({ language = 'en', onTranscript, disabled = false, siz
 
   const handleStartListening = () => {
     if (!isSpeechRecognitionSupported()) {
-      setError('Speech Recognition not supported in your browser');
+      setError(t('speech_not_supported', 'Speech Recognition not supported in your browser'));
       return;
     }
 
@@ -54,15 +56,14 @@ const MicrophoneButton = ({ language = 'en', onTranscript, disabled = false, siz
     <button
       onClick={isListening ? handleStopListening : handleStartListening}
       disabled={disabled}
-      title={isListening ? 'Stop listening' : 'Click to speak'}
+      title={isListening ? t('stop_listening', 'Stop listening') : t('click_to_speak', 'Click to speak')}
       className={`
         ${sizeMap[size]}
         flex items-center justify-center rounded-full
         transition-all duration-200
-        ${
-          isListening
-            ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
-            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+        ${isListening
+          ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+          : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
         }
         disabled:opacity-50 disabled:cursor-not-allowed
         focus:outline-none focus:ring-2 focus:ring-blue-400
